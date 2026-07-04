@@ -1,5 +1,42 @@
 # Agent Instructions
 
+## Environment Setup
+
+### Gemini API Key via Azure Key Vault
+The Express server (`server.js`) retrieves the Gemini API key from **Azure Key Vault**:
+- **Authentication:** `DefaultAzureCredential` (uses `az login` — already logged in on CLI)
+- **Key Vault URL:** Set via `AZURE_KEY_VAULT_URL` env var
+- **Secret name:** `GEMINI_API_KEY_PRIMARY` (default, override with `GEMINI_SECRET_NAME` env var)
+- **Fallback:** `GEMINI_API_KEY` env var (used by Flask `server.py`)
+
+### Python Flask Server (Primary)
+```bash
+# Requires GEMINI_API_KEY in .env
+python3 server.py          # port 5000
+python3 -m flask run       # alternative
+```
+
+### Node.js Express Server (Azure Key Vault)
+```bash
+# Uses az login + Azure Key Vault
+AZURE_KEY_VAULT_URL="https://<vault>.vault.azure.net/" node server.js
+```
+
+### Kilo Commands
+This project includes Kilo command specs in `.kilo/command/`:
+| Command | File | Purpose |
+|---------|------|---------|
+| `/pipeline "<topic>"` | `pipeline.md` | Full pipeline: generate assets + render all videos |
+| `/render [scene]` | `render.md` | Render-only: render Remotion MP4s from existing assets |
+| `/generate-assets "<topic>"` | `generate-assets.md` | Generate SVG + narration + MP3 via Gemini |
+| `/serve` | `serve.md` | Start Flask dev server |
+
+### Kilo Agents
+| Agent | File | Specializes in |
+|-------|------|---------------|
+| `remotion-dev` | `remotion-dev.md` | Remotion composition development, debugging, scene creation |
+| `infographic-builder` | `infographic-builder.md` | SVG infographic generation, narration scripts, API calls |
+
 ## Asset Generation Workflow
 
 When generating assets (infographics, audio, animation, etc.):
