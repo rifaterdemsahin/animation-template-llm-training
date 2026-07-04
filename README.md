@@ -4,6 +4,7 @@
 
 [![🎬 GSAP](https://img.shields.io/badge/🎬-GSAP%20Animation-88ce02?style=flat-square)](https://gsap.com)
 [![🤖 LLM-Ready](https://img.shields.io/badge/🤖-LLM%20Ready-00d4aa?style=flat-square)](https://github.com/rifaterdemsahin/animation-template-llm-training)
+[![🚀 Fly.io](https://img.shields.io/badge/🚀-Fly.io-24175C?style=flat-square)](https://animation-template-llm-training.fly.dev)
 [![📄 License: MIT](https://img.shields.io/badge/📄%20License-MIT-yellow?style=flat-square)](LICENSE)
 
 A **generic, self-contained HTML scaffold** for creating cinematic auto-playing architectural demo animations. Designed to be used by **LLMs (Large Language Models)** to rapidly generate polished exam-question demos for the Claude AI Architect certification (or any system-design problem).
@@ -11,11 +12,13 @@ A **generic, self-contained HTML scaffold** for creating cinematic auto-playing 
 ## 🚀 Quickstart
 
 ```bash
-# Open locally (no server needed)
+# Option A — static only (no AI generators)
 open index.html
 
-# Or serve with live reload
-npx serve .
+# Option B — full server with AI generators
+npm install
+npm start
+# → http://localhost:3000
 ```
 
 ---
@@ -71,9 +74,16 @@ Open `index.html` and search for **`CUSTOMIZE`** — every tag is a place to inj
 
 ```
 animation-template-llm-training/
-├── index.html          # 🎬 The main template (self-contained, 1 file)
+├── index.html          # 🎬 The main template (self-contained)
+├── server.js           # 🧠 Express server — AI generators + key vault
+├── Dockerfile          # 🐳 Container image for Fly.io
+├── fly.toml            # 🚀 Fly.io deployment config
+├── .env.example        # 🔑 Environment variables reference
+├── gh-pages/           # 📄 GitHub Pages redirect → Fly.io
+│   └── index.html
 ├── favicon.svg         # 🖼️ Play-button favicon
-├── package.json        # 📦 Minimal project config
+├── package.json        # 📦 Dependencies (Express, Gemini, Azure)
+├── .dockerignore
 ├── .gitignore
 └── README.md           # 📘 This file
 ```
@@ -90,6 +100,8 @@ animation-template-llm-training/
 | **Web Speech API** | Narration buttons (optional) | ✅ Speech text |
 | **Reduced Motion** | `prefers-reduced-motion` support | ✅ Built-in |
 | **Dark Theme** | Cyan/crimson/gold aesthetic | ✅ CSS variables |
+| **🤖 Infographics Generator** | AI-powered SVG infographics on any topic via Gemini API | Gemini API key |
+| **🎤 Audio Generator** | AI-generated narration scripts with browser speech playback | Gemini API key |
 
 ---
 
@@ -158,7 +170,51 @@ Adjust `duration` and `+=` offsets to change pacing for your content.
 
 ## 🖥️ Live Demo
 
-Open `index.html` directly in any browser — **no server or build step required.**
+- **Fly.io (full app with AI generators):** [animation-template-llm-training.fly.dev](https://animation-template-llm-training.fly.dev)
+- **GitHub Pages (static redirect → Fly.io):** [rifaterdemsahin.github.io/animation-template-llm-training](https://rifaterdemsahin.github.io/animation-template-llm-training)
+
+> The Fly.io deployment serves the full app with AI generators. GitHub Pages automatically redirects to Fly.io.
+
+---
+
+## 🚀 Deployment
+
+### Fly.io
+
+```bash
+# Install Flyctl
+brew install flyctl
+
+# Login and launch
+flyctl auth login
+flyctl launch   # first time — creates the app on Fly.io
+
+# Set secrets (Gemini key from Azure Key Vault or direct)
+flyctl secrets set AZURE_KEY_VAULT_URL=https://your-vault.vault.azure.net
+# OR
+flyctl secrets set GEMINI_API_KEY=your_gemini_api_key
+
+# Deploy
+flyctl deploy
+
+# Open
+flyctl open
+```
+
+Push to `main` auto-deploys via the [fly-deploy workflow](.github/workflows/fly-deploy.yml).  
+Add `FLY_API_TOKEN` to your GitHub repository secrets to enable CI/CD.
+
+### Azure Key Vault (recommended)
+
+The server fetches the Gemini API key from Azure Key Vault at startup:
+
+1. Store your Gemini key as a secret (e.g., `GEMINI-API-KEY-PRIMARY`) in your vault
+2. Set `AZURE_KEY_VAULT_URL` environment variable on Fly.io
+3. The server authenticates via `DefaultAzureCredential` (Managed Identity on Fly.io)
+
+### GitHub Pages Redirect
+
+The [static workflow](.github/workflows/static.yml) deploys the `gh-pages/` folder — a meta-refresh redirect page pointing to Fly.io. This means the original GitHub Pages URL always redirects to the live Fly.io app.
 
 ---
 
@@ -168,6 +224,9 @@ Open `index.html` directly in any browser — **no server or build step required
 |-------|-------|
 | **Template by** | rifaterdemsahin |
 | **Animation Engine** | GSAP 3.12.5 (CDN) |
+| **AI Backend** | Google Gemini 2.5 Flash |
+| **Key Vault** | Azure Key Vault |
+| **Hosting** | Fly.io |
 | **License** | MIT |
 
 ---

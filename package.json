@@ -1,12 +1,18 @@
 {
   "name": "animation-template-llm-training",
-  "version": "1.0.0",
-  "description": "🎬 Generic cinematic animation template for architectural demos — GSAP-powered, LLM-ready",
+  "version": "1.1.0",
+  "description": "🎬 GSAP-powered cinematic animation template with AI Infographics & Audio generators — LLM-ready",
   "type": "module",
   "scripts": {
-    "start": "echo 'Open index.html in your browser'",
-    "dev": "npx serve ."
+    "start": "node server.js",
+    "dev": "node --watch server.js"
   },
-  "keywords": ["gsap", "animation", "template", "cinematic", "llm", "architecture-demo"],
-  "license": "MIT"
+  "keywords": ["gsap", "animation", "template", "cinematic", "llm", "architecture-demo", "infographics", "audio"],
+  "license": "MIT",
+  "dependencies": {
+    "@azure/identity": "^4.5.0",
+    "@azure/keyvault-secrets": "^4.9.0",
+    "@google/generative-ai": "^0.21.0",
+    "express": "^4.21.0"
+  }
 }
