@@ -1,0 +1,28 @@
+{
+  "name": "animation-template-llm-training-remotion",
+  "version": "1.0.0",
+  "description": "Remotion video renderer for animation template scenes",
+  "scripts": {
+    "start": "remotion studio",
+    "build": "remotion render",
+    "render:all": "node render-all.mjs",
+    "render:scene1": "remotion render src/index.ts Scene1 out/scene1.mp4",
+    "render:scene2": "remotion render src/index.ts Scene2 out/scene2.mp4",
+    "render:scene3": "remotion render src/index.ts Scene3 out/scene3.mp4",
+    "render:scene4": "remotion render src/index.ts Scene4 out/scene4.mp4",
+    "render:full": "remotion render src/index.ts FullVideo out/full-video.mp4",
+    "studio": "remotion studio src/index.ts"
+  },
+  "dependencies": {
+    "@remotion/bundler": "^4.0.484",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.242"
+  },
+  "devDependencies": {
+    "@remotion/cli": "^4.0.242",
+    "@remotion/renderer": "^4.0.242",
+    "@types/react": "^18.3.12",
+    "typescript": "^5.6.3"
+  }
+}
