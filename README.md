@@ -1,5 +1,7 @@
 # 🎬 GSAP Cinematic Animation Template for LLM Training
 
+> https://rifaterdemsahin.github.io/animation-template-llm-training/
+
 [![🎬 GSAP](https://img.shields.io/badge/🎬-GSAP%20Animation-88ce02?style=flat-square)](https://gsap.com)
 [![🤖 LLM-Ready](https://img.shields.io/badge/🤖-LLM%20Ready-00d4aa?style=flat-square)](https://github.com/rifaterdemsahin/animation-template-llm-training)
 [![📄 License: MIT](https://img.shields.io/badge/📄%20License-MIT-yellow?style=flat-square)](LICENSE)
