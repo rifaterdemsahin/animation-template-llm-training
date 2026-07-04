@@ -1,19 +1,64 @@
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Audio, Img, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 
-const METRICS = [
+type Metric = {
+  label: string;
+  unit: string;
+  target: number;
+  icon: string;
+};
+
+type SceneProps = {
+  svgData?: string;
+  audioSrc?: string;
+  script?: string;
+  title?: string;
+  metrics?: Metric[];
+  modelName?: string;
+};
+
+const DEFAULT_METRICS: Metric[] = [
   { label: 'Read Throughput Increase', unit: '%', target: 250, icon: '\u26A1' },
   { label: 'Data Consistency & Reliability', unit: '%', target: 100, icon: '\u{1F6E1}\uFE0F' },
   { label: 'System Auditability', unit: '%', target: 100, icon: '\u{1F4C8}' },
 ];
 
-const Scene4: React.FC = () => {
+const Scene4: React.FC<SceneProps> = ({
+  svgData,
+  audioSrc,
+  title = 'The Results: Unleashing Architectural Power',
+  metrics,
+  modelName = 'GPT-4o & Remotion',
+}) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
   const titleOpacity = interpolate(frame, [0, 15], [0, 1]);
 
+  const displayMetrics = metrics ?? DEFAULT_METRICS;
+
+  const svgDataUri = svgData
+    ? `data:image/svg+xml;base64,${Buffer.from(svgData).toString('base64')}`
+    : null;
+
   return (
     <AbsoluteFill style={{ backgroundColor: '#0a0e27' }}>
+      {svgDataUri && (
+        <Img
+          src={svgDataUri}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: 0.12,
+          }}
+        />
+      )}
+
+      {audioSrc && <Audio src={audioSrc} />}
+
       <div
         style={{
           position: 'absolute',
@@ -38,7 +83,7 @@ const Scene4: React.FC = () => {
             opacity: titleOpacity,
           }}
         >
-          The Results: Unleashing Architectural Power
+          {title}
         </h2>
 
         <div
@@ -50,7 +95,7 @@ const Scene4: React.FC = () => {
             width: '90%',
           }}
         >
-          {METRICS.map((metric, i) => {
+          {displayMetrics.map((metric, i) => {
             const s = spring({
               frame: frame - 20 - i * 8,
               fps,
@@ -108,7 +153,7 @@ const Scene4: React.FC = () => {
             fontSize: 20,
           }}
         >
-          Built with GPT-4o & Remotion
+          Built with {modelName}
         </p>
       </div>
     </AbsoluteFill>

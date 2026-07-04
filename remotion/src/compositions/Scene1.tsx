@@ -1,17 +1,27 @@
-import { AbsoluteFill, spring, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Audio, Img, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 
-const BADGES = [
-  { label: 'Built with GPT-4o', color: '#00d4aa' },
-  { label: 'GSAP Animation', color: '#00d4aa' },
-];
+type SceneProps = {
+  svgData?: string;
+  audioSrc?: string;
+  script?: string;
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  badges?: string[];
+  antiPattern?: string;
+  solutionName?: string;
+};
 
-const BADGE_CHAIN = [
-  { label: 'Monolithic CRUD', color: '#e94560', type: 'bad' },
-  { label: '→', color: '#e8c766', type: 'arrow' },
-  { label: 'CQRS & Event Sourcing', color: '#00d4aa', type: 'good' },
-];
-
-const Scene1: React.FC = () => {
+const Scene1: React.FC<SceneProps> = ({
+  svgData,
+  audioSrc,
+  title = 'CQRS & Event Sourcing',
+  subtitle = 'Mastering Data Flow, Empowering Applications',
+  description = 'Discover how Command Query Responsibility Segregation and Event Sourcing revolutionize modern software architecture.',
+  badges,
+  antiPattern = 'Monolithic CRUD',
+  solutionName = 'CQRS & Event Sourcing',
+}) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -25,8 +35,31 @@ const Scene1: React.FC = () => {
   const descOpacity = Math.max(0, Math.min((frame - 20) / 15, 1));
   const badgeOpacity = Math.max(0, Math.min((frame - 30) / 15, 1));
 
+  const displayBadges = badges ?? ['Built with GPT-4o', 'Remotion Video'];
+
+  const svgDataUri = svgData
+    ? `data:image/svg+xml;base64,${Buffer.from(svgData).toString('base64')}`
+    : null;
+
   return (
     <AbsoluteFill style={{ backgroundColor: '#0a0e27' }}>
+      {svgDataUri && (
+        <Img
+          src={svgDataUri}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: 0.15,
+          }}
+        />
+      )}
+
+      {audioSrc && <Audio src={audioSrc} />}
+
       <div
         style={{
           position: 'absolute',
@@ -51,19 +84,19 @@ const Scene1: React.FC = () => {
             transform: `translateY(${(1 - badgeSpring) * 30}px)`,
           }}
         >
-          {BADGES.map((badge, i) => (
+          {displayBadges.map((badge, i) => (
             <span
               key={i}
               style={{
                 background: '#1a1f4e',
-                color: badge.color,
+                color: '#00d4aa',
                 padding: '8px 20px',
                 borderRadius: 20,
                 fontSize: 18,
-                border: `1px solid ${badge.color}`,
+                border: '1px solid #00d4aa',
               }}
             >
-              {badge.label}
+              {badge}
             </span>
           ))}
         </div>
@@ -78,7 +111,7 @@ const Scene1: React.FC = () => {
             transform: `translateY(${(1 - titleSpring) * 40}px)`,
           }}
         >
-          CQRS & Event Sourcing
+          {title}
         </h1>
 
         <h2
@@ -91,7 +124,7 @@ const Scene1: React.FC = () => {
             transform: `translateY(${(1 - subtitleSpring) * 30}px)`,
           }}
         >
-          Mastering Data Flow, Empowering Applications
+          {subtitle}
         </h2>
 
         <p
@@ -105,8 +138,7 @@ const Scene1: React.FC = () => {
             transform: `translateY(${(1 - descSpring) * 20}px)`,
           }}
         >
-          Discover how Command Query Responsibility Segregation and Event Sourcing
-          revolutionize modern software architecture.
+          {description}
         </p>
 
         <div
@@ -117,22 +149,41 @@ const Scene1: React.FC = () => {
             opacity: badgeOpacity,
           }}
         >
-          {BADGE_CHAIN.map((badge, i) => (
-            <span
-              key={i}
-              style={{
-                background: badge.type === 'arrow' ? 'transparent' : '#1a1f4e',
-                color: badge.color,
-                padding: badge.type === 'arrow' ? '8px 4px' : '8px 20px',
-                borderRadius: 20,
-                fontSize: 18,
-                border: badge.type === 'arrow' ? 'none' : `1px solid ${badge.color}`,
-                fontWeight: badge.type === 'arrow' ? 'bold' : 'normal',
-              }}
-            >
-              {badge.label}
-            </span>
-          ))}
+          <span
+            style={{
+              background: '#1a1f4e',
+              color: '#e94560',
+              padding: '8px 20px',
+              borderRadius: 20,
+              fontSize: 18,
+              border: '1px solid #e94560',
+            }}
+          >
+            {antiPattern}
+          </span>
+          <span
+            style={{
+              background: 'transparent',
+              color: '#e8c766',
+              padding: '8px 4px',
+              fontSize: 18,
+              fontWeight: 'bold',
+            }}
+          >
+            →
+          </span>
+          <span
+            style={{
+              background: '#1a1f4e',
+              color: '#00d4aa',
+              padding: '8px 20px',
+              borderRadius: 20,
+              fontSize: 18,
+              border: '1px solid #00d4aa',
+            }}
+          >
+            {solutionName}
+          </span>
         </div>
       </div>
     </AbsoluteFill>

@@ -1,13 +1,34 @@
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Audio, Img, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 
-const PROBLEM_BADGES = [
+type SceneProps = {
+  svgData?: string;
+  audioSrc?: string;
+  script?: string;
+  title?: string;
+  description?: string;
+  badges?: string[];
+  failureScenario?: string;
+  failureConsequence?: string;
+  warningMessage?: string;
+};
+
+const DEFAULT_BADGES = [
   'Read/Write Contention',
   'Scalability Limits',
   'Complex Logic',
   'Poor Auditability',
 ];
 
-const Scene2: React.FC = () => {
+const Scene2: React.FC<SceneProps> = ({
+  svgData,
+  audioSrc,
+  title = 'The Monolithic Trap: Data Inconsistency & Bottlenecks',
+  description = 'Witness the struggles of traditional architectures when faced with complex domain logic and high concurrency.',
+  badges,
+  failureScenario = 'A single, shared database struggles to handle simultaneous updates and diverse read requests from numerous services, leading to deadlocks, stale data, and slow response times.',
+  failureConsequence = 'Users experience frustrating delays, unreliable data, and system crashes under peak load.',
+  warningMessage = 'Beware: Tight Coupling Leads to Operational Chaos!',
+}) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -19,8 +40,31 @@ const Scene2: React.FC = () => {
   const warningOut = interpolate(frame, [160, 175], [1, 0]);
   const flashOpacity = interpolate(frame, [130, 135, 140, 150], [0, 0.1, 0.1, 0]);
 
+  const problemBadges = badges ?? DEFAULT_BADGES;
+
+  const svgDataUri = svgData
+    ? `data:image/svg+xml;base64,${Buffer.from(svgData).toString('base64')}`
+    : null;
+
   return (
     <AbsoluteFill style={{ backgroundColor: '#0a0e27' }}>
+      {svgDataUri && (
+        <Img
+          src={svgDataUri}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: 0.12,
+          }}
+        />
+      )}
+
+      {audioSrc && <Audio src={audioSrc} />}
+
       <div
         style={{
           position: 'absolute',
@@ -45,7 +89,7 @@ const Scene2: React.FC = () => {
             opacity: titleOpacity,
           }}
         >
-          The Monolithic Trap: Data Inconsistency & Bottlenecks
+          {title}
         </h2>
 
         <p
@@ -58,8 +102,7 @@ const Scene2: React.FC = () => {
             opacity: descOpacity,
           }}
         >
-          Witness the struggles of traditional architectures when faced with complex
-          domain logic and high concurrency.
+          {description}
         </p>
 
         <div
@@ -72,8 +115,8 @@ const Scene2: React.FC = () => {
             opacity: badgeOpacity,
           }}
         >
-          {PROBLEM_BADGES.map((label, i) => {
-            const springVal = spring({
+          {problemBadges.map((label, i) => {
+            const s = spring({
               frame: frame - 20 - i * 5,
               fps,
               config: { damping: 12 },
@@ -88,8 +131,8 @@ const Scene2: React.FC = () => {
                   borderRadius: 20,
                   fontSize: 18,
                   border: '1px solid #e94560',
-                  transform: `scale(${springVal})`,
-                  opacity: springVal,
+                  transform: `scale(${s})`,
+                  opacity: s,
                 }}
               >
                 {label}
@@ -111,13 +154,10 @@ const Scene2: React.FC = () => {
           }}
         >
           <p style={{ color: '#ff6666', fontSize: 18, margin: 0, marginBottom: 8 }}>
-            A single, shared database struggles to handle simultaneous updates and
-            diverse read requests from numerous services, leading to deadlocks, stale
-            data, and slow response times.
+            {failureScenario}
           </p>
           <p style={{ color: '#e94560', fontSize: 18, margin: 0 }}>
-            Users experience frustrating delays, unreliable data, and system crashes
-            under peak load.
+            {failureConsequence}
           </p>
         </div>
       </div>
@@ -146,7 +186,7 @@ const Scene2: React.FC = () => {
             SYSTEM COMPROMISED
           </h2>
           <p style={{ color: '#ff6666', fontSize: 28, margin: 0 }}>
-            Beware: Tight Coupling Leads to Operational Chaos!
+            {warningMessage}
           </p>
         </div>
       </div>

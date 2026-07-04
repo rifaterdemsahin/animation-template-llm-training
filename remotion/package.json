@@ -11,7 +11,10 @@
     "render:scene3": "remotion render src/index.ts Scene3 out/scene3.mp4",
     "render:scene4": "remotion render src/index.ts Scene4 out/scene4.mp4",
     "render:full": "remotion render src/index.ts FullVideo out/full-video.mp4",
-    "studio": "remotion studio src/index.ts"
+    "studio": "remotion studio src/index.ts",
+    "generate:assets": "node generate-assets.mjs",
+    "generate:scene1": "node generate-assets.mjs && npm run render:scene1",
+    "pipeline": "node generate-and-render.mjs"
   },
   "dependencies": {
     "@remotion/bundler": "^4.0.484",

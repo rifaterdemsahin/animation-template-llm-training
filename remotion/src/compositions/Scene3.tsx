@@ -1,6 +1,22 @@
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Audio, Img, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 
-const PILLARS = [
+type Pillar = {
+  icon: string;
+  title: string;
+  description: string;
+};
+
+type SceneProps = {
+  svgData?: string;
+  audioSrc?: string;
+  script?: string;
+  title?: string;
+  description?: string;
+  pillars?: Pillar[];
+  successMessage?: string;
+};
+
+const DEFAULT_PILLARS: Pillar[] = [
   {
     icon: '\u{1F6E1}\uFE0F',
     title: 'CQRS',
@@ -18,7 +34,14 @@ const PILLARS = [
   },
 ];
 
-const Scene3: React.FC = () => {
+const Scene3: React.FC<SceneProps> = ({
+  svgData,
+  audioSrc,
+  title = 'CQRS & Event Sourcing: A Resilient Paradigm',
+  description = 'Embrace a decoupled, event-driven architecture that champions performance, consistency, and a complete historical record.',
+  pillars,
+  successMessage = 'Achieve ultimate data consistency, high throughput, robust audit trails, and effortless horizontal scaling.',
+}) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -26,8 +49,31 @@ const Scene3: React.FC = () => {
   const descOpacity = interpolate(frame, [10, 25], [0, 1]);
   const successOpacity = interpolate(frame, [180, 200], [0, 1]);
 
+  const displayPillars = pillars ?? DEFAULT_PILLARS;
+
+  const svgDataUri = svgData
+    ? `data:image/svg+xml;base64,${Buffer.from(svgData).toString('base64')}`
+    : null;
+
   return (
     <AbsoluteFill style={{ backgroundColor: '#0a0e27' }}>
+      {svgDataUri && (
+        <Img
+          src={svgDataUri}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: 0.12,
+          }}
+        />
+      )}
+
+      {audioSrc && <Audio src={audioSrc} />}
+
       <div
         style={{
           position: 'absolute',
@@ -52,7 +98,7 @@ const Scene3: React.FC = () => {
             opacity: titleOpacity,
           }}
         >
-          CQRS & Event Sourcing: A Resilient Paradigm
+          {title}
         </h2>
 
         <p
@@ -65,8 +111,7 @@ const Scene3: React.FC = () => {
             opacity: descOpacity,
           }}
         >
-          Embrace a decoupled, event-driven architecture that champions performance,
-          consistency, and a complete historical record.
+          {description}
         </p>
 
         <div
@@ -78,7 +123,7 @@ const Scene3: React.FC = () => {
             width: '90%',
           }}
         >
-          {PILLARS.map((pillar, i) => {
+          {displayPillars.map((pillar, i) => {
             const s = spring({
               frame: frame - 30 - i * 10,
               fps,
@@ -126,8 +171,7 @@ const Scene3: React.FC = () => {
           }}
         >
           <p style={{ color: '#00d4aa', fontSize: 20, margin: 0 }}>
-            Achieve ultimate data consistency, high throughput, robust audit trails,
-            and effortless horizontal scaling.
+            {successMessage}
           </p>
         </div>
       </div>

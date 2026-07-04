@@ -7,6 +7,12 @@ import FullVideo from './compositions/FullVideo';
 
 const FPS = 30;
 
+const sharedProps = {
+  svgData: undefined as string | undefined,
+  audioSrc: undefined as string | undefined,
+  script: undefined as string | undefined,
+};
+
 export const RemotionRoot: React.FC = () => {
   return (
     <>
@@ -17,6 +23,7 @@ export const RemotionRoot: React.FC = () => {
         fps={FPS}
         width={1920}
         height={1080}
+        defaultProps={sharedProps}
       />
       <Composition
         id="Scene2"
@@ -25,6 +32,7 @@ export const RemotionRoot: React.FC = () => {
         fps={FPS}
         width={1920}
         height={1080}
+        defaultProps={sharedProps}
       />
       <Composition
         id="Scene3"
@@ -33,6 +41,7 @@ export const RemotionRoot: React.FC = () => {
         fps={FPS}
         width={1920}
         height={1080}
+        defaultProps={sharedProps}
       />
       <Composition
         id="Scene4"
@@ -41,6 +50,7 @@ export const RemotionRoot: React.FC = () => {
         fps={FPS}
         width={1920}
         height={1080}
+        defaultProps={sharedProps}
       />
       <Composition
         id="FullVideo"
@@ -49,6 +59,7 @@ export const RemotionRoot: React.FC = () => {
         fps={FPS}
         width={1920}
         height={1080}
+        defaultProps={sharedProps}
       />
     </>
   );
