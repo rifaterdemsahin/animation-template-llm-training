@@ -1,0 +1,100 @@
+{
+  "modelName": "GPT-4o or similar multimodal model for visual generation",
+  "scenes": [
+    {
+      "animation": {
+        "duration": 0.8,
+        "ease": "power2.out",
+        "stagger": 0.15
+      },
+      "antiPattern": "Monolithic CRUD",
+      "badges": [
+        "\ud83c\udff7\ufe0f Scalability",
+        "\ud83c\udff7\ufe0f Auditability",
+        "\ud83c\udff7\ufe0f Performance",
+        "\ud83c\udff7\ufe0f Decoupling"
+      ],
+      "description": "Discover how Command Query Responsibility Segregation and Event Sourcing revolutionize modern software architecture.",
+      "id": 1,
+      "solutionName": "CQRS & Event Sourcing",
+      "subtitle": "Mastering Data Flow, Empowering Applications",
+      "title": "Unveiling CQRS & Event Sourcing"
+    },
+    {
+      "animation": {
+        "duration": 0.8,
+        "ease": "power2.out",
+        "stagger": 0.15
+      },
+      "badges": [
+        "\u274c Read/Write Contention",
+        "\u274c Scalability Limits",
+        "\u274c Complex Logic",
+        "\u274c Poor Auditability"
+      ],
+      "description": "Witness the struggles of traditional architectures when faced with complex domain logic and high concurrency.",
+      "failureConsequence": "Users experience frustrating delays, unreliable data, and system crashes under peak load, severely impacting business operations and trust.",
+      "failureScenario": "A single, shared database struggles to handle simultaneous updates and diverse read requests from numerous services, leading to deadlocks, stale data, and slow response times.",
+      "id": 2,
+      "title": "The Monolithic Trap: Data Inconsistency & Bottlenecks",
+      "warningMessage": "Beware: Tight Coupling Leads to Operational Chaos!"
+    },
+    {
+      "animation": {
+        "duration": 0.7,
+        "ease": "back.out(1.7)",
+        "stagger": 0.25
+      },
+      "description": "Embrace a decoupled, event-driven architecture that champions performance, consistency, and a complete historical record.",
+      "id": 3,
+      "pillars": [
+        {
+          "description": "Separating read (queries) and write (commands) operations, allowing independent optimization and scaling for each.",
+          "icon": "\ud83d\udee1\ufe0f",
+          "title": "CQRS (Command Query Responsibility Segregation)"
+        },
+        {
+          "description": "Storing all changes to application state as a sequence of immutable events, creating a perfect audit trail and enabling powerful temporal queries.",
+          "icon": "\u26a1",
+          "title": "Event Sourcing"
+        },
+        {
+          "description": "Projecting events into denormalized, purpose-built data stores tailored for specific query needs, ensuring blazing-fast reads.",
+          "icon": "\ud83d\udcca",
+          "title": "Optimized Read Models"
+        }
+      ],
+      "successMessage": "\u2705 Achieve ultimate data consistency, high throughput, robust audit trails, and effortless horizontal scaling.",
+      "title": "CQRS & Event Sourcing: A Resilient Paradigm"
+    },
+    {
+      "animation": {
+        "duration": 0.8,
+        "ease": "elastic.out(1, 0.3)",
+        "stagger": 0.2
+      },
+      "description": "Experience the transformative impact of CQRS and Event Sourcing on system performance, reliability, and insight.",
+      "id": 4,
+      "metrics": [
+        {
+          "label": "\u26a1 Read Throughput Increase",
+          "target": 250,
+          "unit": "%"
+        },
+        {
+          "label": "\ud83d\udee1\ufe0f Data Consistency & Reliability",
+          "target": 100,
+          "unit": "%"
+        },
+        {
+          "label": "\ud83d\udcc8 System Auditability",
+          "target": 100,
+          "unit": "%"
+        }
+      ],
+      "title": "The Results: Unleashing Architectural Power"
+    }
+  ],
+  "title": "CQRS & Event Sourcing: Architects of Scalable Systems",
+  "totalDuration": 30
+}

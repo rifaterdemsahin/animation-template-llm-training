@@ -160,38 +160,33 @@ footer{text-align:center;padding:40px 20px;border-top:1px solid var(--card);colo
   .card-grid{grid-template-columns:1fr}
   .cinema-scene .pillar-grid,.metrics-grid{grid-template-columns:1fr;gap:12px}
 }
-.gen-card{background:var(--card);border-radius:16px;padding:32px;margin:24px 0;border:2px solid var(--muted)}
-.gen-row{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
-.gen-row input[type="text"]{flex:1;min-width:200px;padding:12px 16px;border-radius:8px;border:1px solid var(--muted);background:var(--bg);color:var(--text);font-size:15px}
-.gen-row input[type="text"]:focus{outline:none;border-color:var(--cyan)}
-.gen-btn{padding:12px 24px;font-size:15px}
-.gen-loading{display:none;align-items:center;gap:12px;padding:20px;justify-content:center}
-.gen-loading.visible{display:flex}
-.gen-loading p{color:var(--muted);font-size:14px}
-.gen-result{display:none;margin-top:16px}
-.gen-result.visible{display:block}
-.gen-actions{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.gen-error{background:rgba(233,69,96,0.1);border:1px solid var(--crimson);border-radius:10px;padding:16px;color:var(--crimson);font-size:14px;margin-top:12px;display:none}
-.gen-error.visible{display:block}
-.gen-select{padding:8px 12px;border-radius:8px;border:1px solid var(--muted);background:var(--bg);color:var(--text);font-size:14px;min-width:120px;cursor:pointer}
-.gen-select:focus{outline:none;border-color:var(--cyan)}
-.gen-check{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:14px;cursor:pointer;white-space:nowrap}
-.gen-check input{accent-color:var(--cyan);width:16px;height:16px;cursor:pointer}
-.infra-svg-container{background:var(--bg);border-radius:12px;padding:16px;overflow:auto;max-height:700px}
-.infra-svg-container svg{width:100%;height:auto;max-width:800px;display:block;margin:0 auto}
-.audio-controls{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
-.voice-select{padding:8px 12px;border-radius:8px;border:1px solid var(--muted);background:var(--bg);color:var(--text);font-size:14px;min-width:180px}
-.voice-select:focus{outline:none;border-color:var(--cyan)}
-.audio-script{background:var(--bg);border-radius:10px;padding:20px;font-size:15px;line-height:1.8;color:var(--text);white-space:pre-wrap;max-height:400px;overflow-y:auto}
-.audio-script.speaking{box-shadow:inset 0 0 20px rgba(0,212,170,0.1)}
-.anim-preview{background:var(--bg);border-radius:10px;padding:20px;max-height:500px;overflow-y:auto;font-size:13px;line-height:1.6;font-family:'Cascadia Code','Fira Code','Consolas',monospace;color:var(--muted);white-space:pre-wrap}
-.anim-preview .key{color:var(--cyan)}
-.anim-preview .string{color:var(--gold)}
-.anim-preview .number{color:var(--green)}
-.anim-preview .highlight{background:rgba(0,212,170,0.08);border-radius:4px;padding:8px;margin:4px 0;border-left:3px solid var(--cyan)}
-.anim-preview .highlight strong{color:var(--cyan)}
-.spinner{width:24px;height:24px;border:3px solid var(--muted);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0}
-@keyframes spin{to{transform:rotate(360deg)}}
+/*
+╔══════════════════════════════════════════════════════════════════════╗
+║  AI GENERATOR API ENDPOINTS (server.py)                              ║
+║  Use these endpoints to build custom generator UIs:                  ║
+║                                                                      ║
+║  POST /api/generate/infographic                                      ║
+║    Body: { topic, style?, theme?, animated? }                        ║
+║    Returns: { svg: "<svg>..." }                                      ║
+║    → SVG infographic markup                                          ║
+║                                                                      ║
+║  POST /api/generate/audio                                            ║
+║    Body: { topic } or { script }                                     ║
+║    Returns: { script: "...", duration: N }                           ║
+║    → Narration script + estimated seconds                            ║
+║                                                                      ║
+║  POST /api/generate/animation                                        ║
+║    Body: { topic, scenes? }                                          ║
+║    Returns: { title, totalDuration, scenes: [...] }                  ║
+║    → Full GSAP scene config with timing, pillars, metrics            ║
+║                                                                      ║
+║  To wire up:                                                         ║
+║    fetch('/api/generate/infographic', { method:'POST',               ║
+║      headers:{'Content-Type':'application/json'},                    ║
+║      body: JSON.stringify({ topic:"your topic" }) })                 ║
+║      .then(r => r.json()).then(d => { /* use d.svg */ })             ║
+╚══════════════════════════════════════════════════════════════════════╝
+*/
 @media(prefers-reduced-motion:reduce){
   *{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}
   #cinematic-overlay{display:none!important}
@@ -431,92 +426,42 @@ footer{text-align:center;padding:40px 20px;border-top:1px solid var(--card);colo
   </div>
 </section>
 
-<!-- ── Infographics Generator ── -->
-<section>
-  <h2>📊 Infographics Generator</h2>
-  <p style="text-align:center;color:var(--muted);margin-bottom:16px">Generate AI-powered SVG infographics with customizable style, theme, and GSAP animation properties.</p>
-  <div class="gen-card">
-    <div class="gen-row">
-      <input type="text" id="infra-topic" placeholder="e.g., Microservices vs Monolith Architecture" />
-      <select class="gen-select" id="infra-style">
-        <option value="">Default style</option>
-        <option value="Minimalist, clean lines, lots of whitespace, simple icons">Minimalist</option>
-        <option value="Architectural diagram with connected blocks, flow arrows, layered layers">Architectural</option>
-        <option value="Data-heavy with bar charts, percentages, comparison tables, number callouts">Data-driven</option>
-        <option value="Timeline-style with steps, milestones, and progress indicators">Timeline</option>
-      </select>
-      <select class="gen-select" id="infra-theme">
-        <option value="dark">Dark theme</option>
-        <option value="light">Light theme</option>
-      </select>
-      <label class="gen-check"><input type="checkbox" id="infra-animated" /> GSAP-ready</label>
-      <button class="btn gen-btn" id="btn-generate-infographic">🎨 Generate</button>
-    </div>
-    <div class="gen-loading" id="infra-loading">
-      <div class="spinner"></div>
-      <p>Generating infographic with Gemini...</p>
-    </div>
-    <div class="gen-error" id="infra-error"></div>
-    <div class="gen-result" id="infra-result">
-      <div class="gen-actions">
-        <button class="btn" id="btn-download-infographic">⬇️ Download SVG</button>
-        <button class="btn" id="btn-regenerate-infographic">🔄 Regenerate</button>
-      </div>
-      <div class="infra-svg-container" id="infra-svg-container"></div>
-    </div>
-  </div>
-</section>
+<!--
+╔══════════════════════════════════════════════════════════════════════╗
+║  CUSTOM GENERATOR UI PLACEHOLDER                                    ║
+║                                                                      ║
+║  Add Infographics Generator HTML here:                               ║
+║  - Text input for topic                                              ║
+║  - Fetch POST /api/generate/infographic                              ║
+║  - Display returned svg inline                                       ║
+║  - Example JS: see server.py API docs above                          ║
+╚══════════════════════════════════════════════════════════════════════╝
+-->
 
-<!-- ── Audio Generator ── -->
-<section>
-  <h2>🎤 Audio Narration Generator</h2>
-  <p style="text-align:center;color:var(--muted);margin-bottom:16px">Generate professional narration scripts and play them with the browser's speech synthesis.</p>
-  <div class="gen-card">
-    <div class="gen-row">
-      <input type="text" id="audio-topic" placeholder="e.g., How this architecture solves the problem" />
-      <button class="btn gen-btn speech" id="btn-generate-audio">🎵 Generate Script</button>
-    </div>
-    <div class="gen-loading" id="audio-loading">
-      <div class="spinner"></div>
-      <p>Generating narration script...</p>
-    </div>
-    <div class="gen-error" id="audio-error"></div>
-    <div class="gen-result" id="audio-result">
-      <div class="audio-controls">
-        <button class="btn speech" id="btn-play-audio">🔊 Play Narration</button>
-        <select class="voice-select" id="audio-voice-select">
-          <option value="">System default voice</option>
-        </select>
-        <span id="audio-duration" style="color:var(--muted);font-size:13px"></span>
-      </div>
-      <div class="audio-script" id="audio-script"></div>
-    </div>
-  </div>
-</section>
+<!--
+╔══════════════════════════════════════════════════════════════════════╗
+║  CUSTOM GENERATOR UI PLACEHOLDER                                    ║
+║                                                                      ║
+║  Add Audio Narration Generator HTML here:                            ║
+║  - Text input for topic                                              ║
+║  - Fetch POST /api/generate/audio                                   ║
+║  - Display returned script, play via SpeechSynthesisUtterance       ║
+║  - Example JS: see server.py API docs above                          ║
+╚══════════════════════════════════════════════════════════════════════╝
+-->
 
-<!-- ── Animation Generator ── -->
-<section>
-  <h2>🎬 Animation Generator</h2>
-  <p style="text-align:center;color:var(--muted);margin-bottom:16px">Generate a full GSAP cinematic animation sequence — scenes, content, timing, and transitions — via Gemini. Then launch it live.</p>
-  <div class="gen-card">
-    <div class="gen-row">
-      <input type="text" id="anim-topic" placeholder="e.g., CQRS vs Event Sourcing architecture comparison" />
-      <button class="btn gen-btn" id="btn-generate-animation">🎬 Generate Animation</button>
-    </div>
-    <div class="gen-loading" id="anim-loading">
-      <div class="spinner"></div>
-      <p>Generating animation configuration with Gemini...</p>
-    </div>
-    <div class="gen-error" id="anim-error"></div>
-    <div class="gen-result" id="anim-result">
-      <div class="gen-actions">
-        <button class="btn" id="btn-apply-animation" style="border-color:var(--gold);color:var(--gold);background:transparent">▶ Launch Cinematic</button>
-        <button class="btn" id="btn-regenerate-animation">🔄 Regenerate</button>
-      </div>
-      <div class="anim-preview" id="anim-preview"></div>
-    </div>
-  </div>
-</section>
+<!--
+╔══════════════════════════════════════════════════════════════════════╗
+║  CUSTOM GENERATOR UI PLACEHOLDER                                    ║
+║                                                                      ║
+║  Add Animation Generator HTML here:                                  ║
+║  - Text input for topic                                              ║
+║  - Fetch POST /api/generate/animation                               ║
+║  - Populate cinematic overlay scenes with returned config            ║
+║  - Call startCinema() to replay                                      ║
+║  - Example JS: see server.py API docs above                          ║
+╚══════════════════════════════════════════════════════════════════════╝
+-->
 
 <footer>
   <p>🤖 Generated by <strong>[Model Name]</strong> — 🎬 <a href="https://github.com/rifaterdemsahin/animation-template-llm-training">Animation Template</a></p>
@@ -755,352 +700,40 @@ function startCinema() {
 }
 
 /* ════════════════════════════════════════════════ */
-/* GENERATORS — Infographics & Audio               */
+/* CUSTOM GENERATOR JS — Triggered by the caller    */
 /* ════════════════════════════════════════════════ */
-
-let currentInfographicSvg = '';
-let currentAudioScript = '';
-let currentAnimationConfig = null;
-let voiceList = [];
-
-function loadVoices() {
-  const select = document.getElementById('audio-voice-select');
-  const voices = speechSynthesis.getVoices();
-  voiceList = voices;
-  select.innerHTML = '<option value="">System default voice</option>';
-  voices.forEach((v, i) => {
-    const opt = document.createElement('option');
-    opt.value = i;
-    opt.textContent = `${v.name} (${v.lang})`;
-    select.appendChild(opt);
-  });
-}
-
-function showError(el, msg) {
-  el.textContent = msg;
-  el.classList.add('visible');
-}
-function hideError(el) {
-  el.textContent = '';
-  el.classList.remove('visible');
-}
-
-async function generateInfographic() {
-  const topic = document.getElementById('infra-topic').value.trim();
-  if (!topic) return;
-
-  const btn = document.getElementById('btn-generate-infographic');
-  const loading = document.getElementById('infra-loading');
-  const error = document.getElementById('infra-error');
-  const result = document.getElementById('infra-result');
-  const container = document.getElementById('infra-svg-container');
-
-  const style = document.getElementById('infra-style').value;
-  const theme = document.getElementById('infra-theme').value;
-  const animated = document.getElementById('infra-animated').checked;
-
-  btn.disabled = true;
-  loading.classList.add('visible');
-  hideError(error);
-  result.classList.remove('visible');
-  currentInfographicSvg = '';
-
-  try {
-    const res = await fetch('/api/generate/infographic', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ topic, style, theme, animated }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Generation failed');
-
-    container.innerHTML = data.svg;
-    currentInfographicSvg = data.svg;
-    result.classList.add('visible');
-  } catch (err) {
-    showError(error, err.message || 'Failed to generate infographic. Is the server running?');
-  } finally {
-    btn.disabled = false;
-    loading.classList.remove('visible');
-  }
-}
-
-function downloadInfographic() {
-  if (!currentInfographicSvg) return;
-  const blob = new Blob([currentInfographicSvg], { type: 'image/svg+xml' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'infographic.svg';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-async function generateAudio() {
-  const topic = document.getElementById('audio-topic').value.trim();
-  if (!topic) return;
-
-  const btn = document.getElementById('btn-generate-audio');
-  const loading = document.getElementById('audio-loading');
-  const error = document.getElementById('audio-error');
-  const result = document.getElementById('audio-result');
-  const scriptEl = document.getElementById('audio-script');
-  const durationEl = document.getElementById('audio-duration');
-
-  btn.disabled = true;
-  loading.classList.add('visible');
-  hideError(error);
-  result.classList.remove('visible');
-  currentAudioScript = '';
-  window.speechSynthesis.cancel();
-
-  try {
-    const res = await fetch('/api/generate/audio', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ topic }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Generation failed');
-
-    currentAudioScript = data.script;
-    scriptEl.textContent = data.script;
-    durationEl.textContent = data.duration ? `~${data.duration}s` : '';
-    result.classList.add('visible');
-  } catch (err) {
-    showError(error, err.message || 'Failed to generate script. Is the server running?');
-  } finally {
-    btn.disabled = false;
-    loading.classList.remove('visible');
-  }
-}
-
-function playAudio() {
-  if (!currentAudioScript) return;
-  window.speechSynthesis.cancel();
-
-  const select = document.getElementById('audio-voice-select');
-  const scriptEl = document.getElementById('audio-script');
-  const btn = document.getElementById('btn-play-audio');
-
-  const utterance = new SpeechSynthesisUtterance(currentAudioScript);
-  const voiceIdx = parseInt(select.value);
-  if (!isNaN(voiceIdx) && voiceList[voiceIdx]) {
-    utterance.voice = voiceList[voiceIdx];
-  }
-
-  utterance.onstart = () => {
-    btn.textContent = '⏹ Stop';
-    scriptEl.classList.add('speaking');
-  };
-  utterance.onend = () => {
-    btn.textContent = '🔊 Play Narration';
-    scriptEl.classList.remove('speaking');
-  };
-  utterance.onerror = () => {
-    btn.textContent = '🔊 Play Narration';
-    scriptEl.classList.remove('speaking');
-  };
-
-  window.speechSynthesis.speak(utterance);
-}
-
+/*                                                   */
+/* To generate an infographic:                       */
+/*   fetch('/api/generate/infographic', {           */
+/*     method:'POST',                                */
+/*     headers:{'Content-Type':'application/json'},  */
+/*     body: JSON.stringify({ topic:"your topic" })  */
+/*   }).then(r=>r.json()).then(d => {                */
+/*     document.getElementById('target').innerHTML   */
+/*       = d.svg;                                    */
+/*   });                                             */
+/*                                                   */
+/* To generate audio narration:                      */
+/*   fetch('/api/generate/audio', {                 */
+/*     method:'POST',                                */
+/*     headers:{'Content-Type':'application/json'},  */
+/*     body: JSON.stringify({ topic:"your topic" })  */
+/*   }).then(r=>r.json()).then(d => {                */
+/*     const u = new SpeechSynthesisUtterance(       */
+/*       d.script);                                  */
+/*     speechSynthesis.speak(u);                     */
+/*   });                                             */
+/*                                                   */
+/* To generate and apply animation:                  */
+/*   fetch('/api/generate/animation', {             */
+/*     method:'POST',                                */
+/*     headers:{'Content-Type':'application/json'},  */
+/*     body: JSON.stringify({ topic:"your topic" })  */
+/*   }).then(r=>r.json()).then(config => {           */
+/*     // Populate scene DOM, then restart cinema    */
+/*     startCinema();                                */
+/*   });                                             */
 /* ════════════════════════════════════════════════ */
-/* ANIMATION GENERATOR — AI-Generated GSAP Cinematic */
-/* ════════════════════════════════════════════════ */
-
-function renderAnimPreview(config) {
-  const el = document.getElementById('anim-preview');
-  let html = `<div class="highlight"><strong>${escapeHtml(config.title)}</strong> · ~${config.totalDuration || 28}s · ${config.scenes.length} scenes</div>\n`;
-  config.scenes.forEach((s, i) => {
-    html += `\n<span class="key">"scene-${i + 1}"</span> <span class="number">[${s.animation.duration}s]</span> ${escapeHtml(s.title)}\n`;
-    if (s.subtitle) html += `  subtitle: <span class="string">${escapeHtml(s.subtitle)}</span>\n`;
-    if (s.badges) html += `  badges: <span class="string">${s.badges.join(', ')}</span>\n`;
-    if (s.pillars) html += `  pillars: ${s.pillars.map(p => p.title).join(' | ')}\n`;
-    if (s.metrics) html += `  metrics: ${s.metrics.map(m => `${m.label}=${m.target}${m.unit}`).join(', ')}\n`;
-    if (s.animation) html += `  anim: ease=<span class="string">${s.animation.ease}</span> stagger=<span class="number">${s.animation.stagger}</span>\n`;
-  });
-  el.innerHTML = html;
-}
-
-function escapeHtml(str) {
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
-}
-
-function populateScene(sceneEl, scene, idx) {
-  if (!scene) return;
-  const qs = (sel) => sceneEl.querySelector(sel);
-
-  const titleEl = qs('h1, h2');
-  if (titleEl) titleEl.textContent = scene.title || titleEl.textContent;
-
-  if (idx === 0) {
-    const h2 = qs('h2');
-    if (h2 && scene.subtitle) h2.textContent = scene.subtitle;
-    const p = qs('p');
-    if (p && scene.description) p.textContent = scene.description;
-    const badgeRow = qs('.badge-row');
-    if (badgeRow && scene.badges) {
-      badgeRow.innerHTML = scene.badges.map(b => `<span class="badge">${b}</span>`).join('');
-      if (scene.antiPattern) badgeRow.innerHTML += `<span class="badge red">❌ ${scene.antiPattern}</span>`;
-      if (scene.solutionName) badgeRow.innerHTML += `<span class="badge gold">→</span><span class="badge" style="border-color:var(--cyan);color:var(--cyan)">✅ ${scene.solutionName}</span>`;
-    }
-  }
-
-  if (idx === 1) {
-    const p = qs('p');
-    if (p && scene.description) p.textContent = scene.description;
-    const badgeRow = qs('.badge-row');
-    if (badgeRow && scene.badges) {
-      badgeRow.innerHTML = scene.badges.map(b => `<span class="badge red">${b}</span>`).join('');
-    }
-    const failBox = sceneEl.querySelector('div[style*="background:var(--card)"]');
-    if (failBox) {
-      const ps = failBox.querySelectorAll('p');
-      if (ps[0] && scene.failureScenario) ps[0].innerHTML = `🚫 ${scene.failureScenario}`;
-      if (ps[1] && scene.failureConsequence) ps[1].innerHTML = `💥 ${scene.failureConsequence}`;
-    }
-    const warningMsg = sceneEl.querySelector('.warning-box p');
-    if (warningMsg && scene.warningMessage) warningMsg.textContent = scene.warningMessage;
-  }
-
-  if (idx === 2) {
-    const p = qs('p');
-    if (p && scene.description) p.textContent = scene.description;
-    const grid = sceneEl.querySelector('.pillar-grid, .metrics-grid');
-    if (grid && scene.pillars) {
-      grid.className = 'pillar-grid';
-      grid.innerHTML = scene.pillars.map((p, i) =>
-        `<div class="pillar-card" id="pillar-${i + 1}">
-          <div class="icon">${p.icon}</div>
-          <h3>${escapeHtml(p.title)}</h3>
-          <p>${escapeHtml(p.description)}</p>
-        </div>`
-      ).join('');
-    }
-    const successBox = sceneEl.querySelector('div[style*="background:rgba(0,212,170" i]');
-    if (successBox) {
-      const sp = successBox.querySelector('p');
-      if (sp && scene.successMessage) sp.innerHTML = `✅ ${scene.successMessage}`;
-    }
-  }
-
-  if (idx >= 3 && scene.metrics) {
-    const grid = sceneEl.querySelector('.metrics-grid');
-    if (grid) {
-      grid.className = 'metrics-grid';
-      grid.innerHTML = scene.metrics.map((m, i) =>
-        `<div class="metric-card" id="metric-${i + 1}">
-          <div class="value" data-target="${m.target}">0</div>
-          <div class="label">${escapeHtml(m.label)}</div>
-        </div>`
-      ).join('');
-    }
-  }
-}
-
-function applyAnimation() {
-  if (!currentAnimationConfig) return;
-  const config = currentAnimationConfig;
-
-  const sceneEls = [
-    document.getElementById('scene-1'),
-    document.getElementById('scene-2'),
-    document.getElementById('scene-3'),
-    document.getElementById('scene-4'),
-  ];
-
-  config.scenes.forEach((scene, i) => {
-    if (sceneEls[i]) populateScene(sceneEls[i], scene, i);
-  });
-
-  const headerTitle = document.querySelector('header h1');
-  if (headerTitle) headerTitle.textContent = config.title || headerTitle.textContent;
-
-  const anim = document.getElementById('cinematic-overlay');
-  const main = document.getElementById('main-content');
-  if (!anim || anim.classList.contains('hidden')) {
-    anim.classList.remove('hidden');
-    anim.style.display = 'flex';
-    gsap.set(anim, { opacity: 1 });
-    main.classList.remove('visible');
-  }
-
-  const skipBtn = document.getElementById('skip-cinema');
-  if (skipBtn) skipBtn.click();
-  setTimeout(() => {
-    const cinema = document.getElementById('cinematic-overlay');
-    const mainContent = document.getElementById('main-content');
-    cinema.classList.remove('hidden');
-    cinema.style.display = 'flex';
-    mainContent.classList.remove('visible');
-    startCinema();
-  }, 300);
-}
-
-async function generateAnimation() {
-  const topic = document.getElementById('anim-topic').value.trim();
-  if (!topic) return;
-
-  const btn = document.getElementById('btn-generate-animation');
-  const loading = document.getElementById('anim-loading');
-  const error = document.getElementById('anim-error');
-  const result = document.getElementById('anim-result');
-
-  btn.disabled = true;
-  loading.classList.add('visible');
-  hideError(error);
-  result.classList.remove('visible');
-  currentAnimationConfig = null;
-
-  try {
-    const res = await fetch('/api/generate/animation', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ topic }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Generation failed');
-
-    currentAnimationConfig = data;
-    renderAnimPreview(data);
-    result.classList.add('visible');
-  } catch (err) {
-    showError(error, err.message || 'Failed to generate animation. Is the server running?');
-  } finally {
-    btn.disabled = false;
-    loading.classList.remove('visible');
-  }
-}
-
-function setupGenerators() {
-  loadVoices();
-  if (speechSynthesis.onvoiceschanged !== undefined) {
-    speechSynthesis.onvoiceschanged = loadVoices;
-  }
-
-  document.getElementById('btn-generate-infographic').addEventListener('click', generateInfographic);
-  document.getElementById('btn-regenerate-infographic').addEventListener('click', generateInfographic);
-  document.getElementById('btn-download-infographic').addEventListener('click', downloadInfographic);
-  document.getElementById('infra-topic').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') generateInfographic();
-  });
-
-  document.getElementById('btn-generate-audio').addEventListener('click', generateAudio);
-  document.getElementById('btn-play-audio').addEventListener('click', playAudio);
-  document.getElementById('audio-topic').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') generateAudio();
-  });
-
-  document.getElementById('btn-generate-animation').addEventListener('click', generateAnimation);
-  document.getElementById('btn-regenerate-animation').addEventListener('click', generateAnimation);
-  document.getElementById('btn-apply-animation').addEventListener('click', applyAnimation);
-  document.getElementById('anim-topic').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') generateAnimation();
-  });
-}
 
 /* ════════════════════════════════════════════════ */
 /* INITIALIZATION                                    */
@@ -1109,7 +742,6 @@ window.onload = function() {
   startCinema();
   setupCalculator();
   setupTerminal();
-  setupGenerators();
 };
 
 console.log('🎬 Animation Template loaded');
