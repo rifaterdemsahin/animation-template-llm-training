@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import xml.etree.ElementTree as ET
 
 from flask import Flask, request, jsonify, send_from_directory
 from dotenv import load_dotenv
@@ -20,6 +21,23 @@ if GEMINI_API_KEY:
     print('Gemini API initialized')
 else:
     print('WARNING: No GEMINI_API_KEY set — generators unavailable')
+
+
+def validate_svg(svg_text):
+    cleaned = svg_text.strip()
+    try:
+        ET.fromstring(cleaned)
+        return cleaned
+    except ET.ParseError as e:
+        closing_match = re.search(r'</svg>\s*$', cleaned)
+        if not closing_match:
+            cleaned += '</svg>'
+        cleaned = re.sub(r'</(\w+)>(?!.*</\1>)', '', cleaned)
+        try:
+            ET.fromstring(cleaned)
+            return cleaned
+        except ET.ParseError:
+            return svg_text
 
 
 @app.route('/api/health')
@@ -75,6 +93,7 @@ def generate_infographic():
 
         match = re.search(r'```svg\n?(.*?)```', text, re.DOTALL)
         svg = match.group(1).strip() if match else text.strip()
+        svg = validate_svg(svg)
 
         return jsonify({'svg': svg})
     except Exception as e:

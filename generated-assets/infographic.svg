@@ -147,7 +147,7 @@
       <text x="620" y="480" text-anchor="end" font-size="14" fill="#00d4aa"><tspan data-target="90">90</tspan>%</text>
 
       <text x="460" y="505" font-size="14" fill="#e0e0e0">Complexity:</text>
-      <text x="620" y="505" text-anchor="end" font-size="14" fill="#00d4aa"><tspan data-target="80">80</tspan>% (High)</tspan></text>
+      <text x="620" y="505" text-anchor="end" font-size="14" fill="#00d4aa"><tspan data-target="80">80</tspan>% (High)</text>
 
       <text x="460" y="530" font-size="14" fill="#e0e0e0">Tech Lock-in:</text>
       <text x="620" y="530" text-anchor="end" font-size="14" fill="#00d4aa">Low</text>
