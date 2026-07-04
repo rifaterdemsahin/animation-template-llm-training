@@ -1,18 +1,13 @@
 {
   "name": "animation-template-llm-training",
-  "version": "1.1.0",
-  "description": "🎬 GSAP-powered cinematic animation template with AI Infographics & Audio generators — LLM-ready",
+  "version": "1.2.0",
+  "description": "🎬 GSAP-powered cinematic animation template with AI Infographics, Audio & Animation generators — Python backend",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "start": "echo 'Run: python3 server.py'",
+    "test": "cd tests && python3 -m pytest test_server.py -v",
+    "dev": "python3 server.py"
   },
-  "keywords": ["gsap", "animation", "template", "cinematic", "llm", "architecture-demo", "infographics", "audio"],
-  "license": "MIT",
-  "dependencies": {
-    "@azure/identity": "^4.5.0",
-    "@azure/keyvault-secrets": "^4.9.0",
-    "@google/generative-ai": "^0.21.0",
-    "express": "^4.21.0"
-  }
+  "keywords": ["gsap", "animation", "template", "cinematic", "llm", "infographics", "audio", "python"],
+  "license": "MIT"
 }
