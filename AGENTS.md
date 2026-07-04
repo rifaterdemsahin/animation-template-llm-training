@@ -36,3 +36,30 @@ Each scene accepts these optional props:
 - `audioSrc` (string) — path to MP3 file for narration audio
 - `script` (string) — narration text for potential display
 - Additional scene-specific content props (title, description, badges, pillars, metrics, etc.)
+
+## Embedding Rendered MP4 Walkthroughs
+
+When using this template to generate architectural content, embed the rendered Remotion MP4 after each corresponding scene section. The MP4 files are produced at `remotion/out/`:
+
+| Scene | MP4 File | Content |
+|-------|----------|---------|
+| Scene1 | `remotion/out/scene1.mp4` | Introduction / overview |
+| Scene2 | `remotion/out/scene2.mp4` | Architecture pillars breakdown |
+| Scene3 | `remotion/out/scene3.mp4` | Technical metrics / details |
+| Scene4 | `remotion/out/scene4.mp4` | Key features / badges |
+| Full  | `remotion/out/full-video.mp4` | Combined 28s walkthrough |
+
+**Embedding rule:** After each architectural scene section in the generated output (Markdown, HTML, or documentation), insert the corresponding MP4 as a video embed:
+
+```markdown
+<!-- After Scene1 description -->
+<video src="remotion/out/scene1.mp4" controls width="100%"></video>
+```
+
+For full combined walkthrough, embed at the end of the document:
+
+```markdown
+<video src="remotion/out/full-video.mp4" controls width="100%"></video>
+```
+
+**Pipeline integration:** The `npm run pipeline` command already renders all MP4s. After running the pipeline, reference the `remotion/out/` files for embedding in the template output.
