@@ -1,5 +1,20 @@
 # Agent Instructions
 
+## Template Usage: LLM Decision Patterns
+
+When using this template to generate architectural demonstration projects, first read `llm_thinking_log.md` — it records 15 reusable decision patterns for:
+- Project naming from root cause analysis
+- Duck-typed agent contracts (proving config-over-code)
+- Heuristic LLM models for reproducible benchmarks
+- Token calculation formulas for cost quantification
+- Visual design rules (4-color palette, 4-scene timeline)
+- Image/MP4 fallback strategies when APIs are unavailable
+- Web Speech API narration patterns
+- Interactive widget construction (vanilla stack)
+- QA audit overclaim identification
+- Module file split conventions
+- GitHub Pages deployment verification
+
 ## Environment Setup
 
 ### Gemini API Key via Azure Key Vault
