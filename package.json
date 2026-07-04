@@ -1,0 +1,12 @@
+{
+  "name": "animation-template-llm-training",
+  "version": "1.0.0",
+  "description": "🎬 Generic cinematic animation template for architectural demos — GSAP-powered, LLM-ready",
+  "type": "module",
+  "scripts": {
+    "start": "echo 'Open index.html in your browser'",
+    "dev": "npx serve ."
+  },
+  "keywords": ["gsap", "animation", "template", "cinematic", "llm", "architecture-demo"],
+  "license": "MIT"
+}

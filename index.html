@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<!--
+╔══════════════════════════════════════════════════════════════╗
+║  🎬 GSAP Cinematic Animation Template                      ║
+║  ──────────────────────────────────────────────────────────  ║
+║  Purpose: Reusable scaffold for LLM-generated architectural  ║
+║  demo animations. Adapt scenes, metrics, and visuals to     ║
+║  any exam question or system design problem.                ║
+║                                                            ║
+║  Instructions for LLMs:                                     ║
+║  1. Search for "CUSTOMIZE" — everything under these tags    ║
+║     is yours to rewrite for your specific scenario.         ║
+║  2. Keep the 4-scene structure for cinematic pacing:        ║
+║     Scene 1: Setup (0-4s) → Scene 2: Problem/Fail (4-12s)  ║
+║     Scene 3: Solution/Succeed (12-22s) → Scene 4: Metrics   ║
+║  3. Replace placeholder text, colors, metrics, diagrams.    ║
+║  4. Keep the infrastructure (modal, speech, calculator)     ║
+║     unless you don't need them.                              ║
+╚══════════════════════════════════════════════════════════════╝
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- ════════════════════════════════════════════════ -->
+<!-- CUSTOMIZE: Page title & description              -->
+<!-- ════════════════════════════════════════════════ -->
+<meta name="description" content="🎬 Cinematic demo template — replace this description with your scenario">
+<title>🎬 Animation Template</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+/* ════════════════════════════════════════════════ */
+/* CUSTOMIZE: Theme colors                         */
+/* ════════════════════════════════════════════════ */
+:root {
+  --cyan: #00d4aa;
+  --crimson: #e94560;
+  --bg: #0a0e27;
+  --bg2: #0f1440;
+  --card: #1a1f4e;
+  --text: #c8d6e5;
+  --muted: #667799;
+  --gold: #e8c766;
+  --green: #66ff99;
+  --red: #ff6666;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--cyan);text-decoration:none}
+::selection{background:var(--cyan);color:var(--bg)}
+
+/* ── Cinematic Overlay ── */
+#cinematic-overlay{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden}
+#cinematic-overlay.hidden{display:none}
+.cinema-scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;padding:40px}
+.cinema-scene h1{font-size:clamp(32px,5vw,64px);color:var(--cyan);text-align:center;margin-bottom:16px}
+.cinema-scene h2{font-size:clamp(24px,3vw,48px);color:var(--gold);text-align:center;margin-bottom:12px}
+.cinema-scene p{font-size:clamp(16px,2vw,28px);color:var(--muted);text-align:center;max-width:800px;margin:8px auto}
+.cinema-scene .badge-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:16px 0}
+.badge{background:var(--card);color:var(--cyan);padding:8px 20px;border-radius:20px;font-size:clamp(14px,1.2vw,20px);border:1px solid var(--cyan)}
+.badge.red{border-color:var(--crimson);color:var(--crimson)}
+.badge.gold{border-color:var(--gold);color:var(--gold)}
+
+/* CUSTOMIZE: Add scene-specific styles below */
+.pillar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1000px;width:90%;margin:20px auto}
+.pillar-card{background:var(--card);border-radius:16px;padding:24px;text-align:center;border:2px solid var(--muted);opacity:0;transform:translateY(20px)}
+.pillar-card .icon{font-size:clamp(36px,4vw,56px);margin-bottom:12px}
+.pillar-card h3{font-size:clamp(18px,1.5vw,28px);color:var(--cyan);margin-bottom:8px}
+.pillar-card p{font-size:clamp(13px,1vw,18px);color:var(--muted)}
+.metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:900px;width:90%;margin:20px auto}
+.metric-card{background:var(--card);border-radius:16px;padding:24px;text-align:center;opacity:0;transform:scale(0.8)}
+.metric-card .value{font-size:clamp(36px,5vw,72px);font-weight:bold;color:var(--cyan);font-variant-numeric:tabular-nums}
+.metric-card .label{font-size:clamp(14px,1.2vw,20px);color:var(--muted);margin-top:8px}
+.warning-overlay{position:absolute;inset:0;background:rgba(233,69,96,0.15);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;z-index:10}
+.warning-overlay .warning-box{background:rgba(233,69,96,0.12);border:3px solid var(--crimson);border-radius:16px;padding:40px 60px;text-align:center}
+.warning-overlay .warning-box h2{color:var(--crimson);font-size:clamp(28px,4vw,56px)}
+.warning-overlay .warning-box p{color:var(--red);font-size:clamp(18px,2vw,28px)}
+#skip-cinema{position:fixed;bottom:20px;right:20px;z-index:1001;background:var(--card);color:var(--muted);border:1px solid var(--muted);padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px;transition:all 0.3s}
+#skip-cinema:hover{color:var(--cyan);border-color:var(--cyan)}
+#cinema-progress{position:fixed;top:0;left:0;height:3px;background:var(--cyan);z-index:1002;width:0%;transition:width 0.3s}
+
+/* ── Main Content ── */
+#main-content{display:none}
+#main-content.visible{display:block}
+header{background:linear-gradient(135deg,var(--bg2),var(--bg));border-bottom:1px solid var(--card);padding:20px 40px;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+header .header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+header h1{font-size:clamp(18px,2vw,28px);color:var(--cyan)}
+header .header-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid var(--cyan);background:transparent;color:var(--cyan);cursor:pointer;font-size:14px;transition:all 0.3s;min-height:44px;min-width:44px}
+.btn:hover{background:var(--cyan);color:var(--bg)}
+.btn.speech{border-color:var(--gold);color:var(--gold)}
+.btn.speech:hover{background:var(--gold);color:var(--bg)}
+
+/* ── Sections ── */
+section{padding:60px 20px;max-width:1200px;margin:0 auto}
+section h2{font-size:clamp(24px,2.5vw,36px);color:var(--gold);margin-bottom:24px;text-align:center}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin:20px 0}
+.card{background:var(--card);border-radius:12px;padding:24px;border:1px solid rgba(255,255,255,0.05)}
+.card h4{color:var(--gold);font-size:18px;margin-bottom:8px}
+.card p{color:var(--muted);font-size:14px;line-height:1.7}
+.step-card{background:var(--card);border-radius:16px;padding:32px;margin-bottom:24px;border:2px solid transparent;transition:all 0.5s;scroll-margin-top:100px}
+.step-card h3{font-size:clamp(20px,2vw,28px);color:var(--gold);margin-bottom:16px}
+.step-card .sub-box{background:rgba(255,255,255,0.03);border-radius:10px;padding:16px;margin:12px 0}
+.step-card .sub-box h4{color:var(--cyan);font-size:16px;margin-bottom:8px}
+.step-card .sub-box p{color:var(--muted);font-size:14px}
+.diagram-wrap{width:100%;max-width:1200px;margin:16px auto;cursor:zoom-in;border-radius:8px;overflow:hidden}
+.diagram-wrap svg{width:100%;height:auto;display:block;border-radius:8px}
+
+/* ── Comparison Table ── */
+.comparison-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:clamp(13px,1vw,16px)}
+.comparison-table th{background:var(--card);color:var(--gold);padding:12px 16px;text-align:left;border-bottom:2px solid var(--gold)}
+.comparison-table td{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.05)}
+.comparison-table .naive{color:var(--crimson)}
+.comparison-table .resilient{color:var(--cyan)}
+
+/* ── Calculator Widget ── */
+.calc-widget{background:var(--card);border-radius:16px;padding:32px;margin:24px 0;border:2px solid var(--cyan)}
+.calc-widget h3{color:var(--cyan);margin-bottom:16px}
+.calc-row{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.calc-row label{min-width:140px;color:var(--muted);font-size:14px}
+.calc-row input[type="range"]{flex:1;min-width:120px;accent-color:var(--cyan);height:6px}
+.calc-row input[type="number"]{width:80px;padding:8px;border-radius:6px;border:1px solid var(--muted);background:var(--bg);color:var(--text);text-align:center;font-size:14px}
+.calc-result{padding:16px;background:var(--bg);border-radius:10px;margin:16px 0}
+.calc-result .big{font-size:clamp(24px,2.5vw,36px);color:var(--cyan);font-weight:bold}
+
+/* ── Terminal ── */
+.terminal-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+@media(max-width:700px){.terminal-pair{grid-template-columns:1fr}}
+.terminal{background:#000;border-radius:10px;overflow:hidden;font-family:'Cascadia Code','Fira Code','Consolas',monospace;font-size:13px;line-height:1.5}
+.terminal-header{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#1a1a1a;color:var(--muted);font-size:12px}
+.terminal-dot{width:10px;height:10px;border-radius:50%}
+.terminal-dot.red{background:#ff5f57}
+.terminal-dot.yellow{background:#ffbd2e}
+.terminal-dot.green{background:#28c840}
+.terminal-body{padding:12px;min-height:200px;color:#d4d4d4;white-space:pre-wrap}
+.terminal-body .prompt{color:var(--cyan)}
+.terminal-body .error{color:var(--crimson)}
+.terminal-body .success{color:var(--green)}
+.terminal-body .info{color:var(--muted)}
+.terminal-body .cursor{display:inline-block;width:8px;height:16px;background:var(--cyan);animation:blink 0.8s infinite;vertical-align:text-bottom}
+.terminal-body .cursor.hidden{visibility:hidden}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+
+/* ── Modal ── */
+#modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.9);display:none;align-items:center;justify-content:center;cursor:zoom-out;padding:20px}
+#modal-overlay.open{display:flex}
+#modal-overlay img,#modal-overlay svg{max-width:95vw;max-height:95vh;width:auto;height:auto;object-fit:contain;border-radius:8px}
+#modal-close{position:fixed;top:20px;right:20px;z-index:2001;color:white;border:1px solid rgba(255,255,255,0.3);width:48px;height:48px;border-radius:50%;font-size:24px;cursor:pointer;display:none;align-items:center;justify-content:center}
+#modal-close.visible{display:flex}
+
+/* ── Footer ── */
+footer{text-align:center;padding:40px 20px;border-top:1px solid var(--card);color:var(--muted);font-size:14px}
+@media(max-width:600px){
+  header{padding:12px 16px}
+  .hero{padding:40px 16px 30px}
+  section{padding:30px 16px}
+  .step-card{padding:20px}
+  .card-grid{grid-template-columns:1fr}
+  .cinema-scene .pillar-grid,.metrics-grid{grid-template-columns:1fr;gap:12px}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}
+  #cinematic-overlay{display:none!important}
+  #main-content{display:block!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- GSAP CINEMATIC OVERLAY — 4-Scene Auto-Play     -->
+<!-- ════════════════════════════════════════════════ -->
+<!--                                                 -->
+<!-- CUSTOMIZE SCENE 1-4: Replace all text content,  -->
+--><!-- badge labels, and visual elements below with   -->
+<!-- your specific scenario.                          -->
+<!--                                                  -->
+<!-- Timing guidance:                                 -->
+<!--   Scene 1: Setup (0-4s)                          -->
+<!--   Scene 2: Problem / Naive fails (4-12s)         -->
+<!--   Scene 3: Solution / Resilient succeeds (12-22s)-->
+<!--   Scene 4: Metrics (22-28s)                      -->
+<!-- ════════════════════════════════════════════════ -->
+
+<div id="cinematic-overlay">
+  <div id="cinema-progress"></div>
+  <button id="skip-cinema">⏭ Skip &darr;</button>
+
+  <!-- ══ SCENE 1: Setup / Title Card (0-4s) ══ -->
+  <!-- CUSTOMIZE: Title, badges, subtitle -->
+  <div id="scene-1" class="cinema-scene">
+    <div class="badge-row">
+      <span class="badge">🤖 Built with [Model Name]</span>
+      <span class="badge">🎬 GSAP Animation</span>
+    </div>
+    <h1>⚡ [Architecture Pattern Name]</h1>
+    <h2>[Subtitle / Problem Statement]</h2>
+    <p>[Brief 1-sentence description of what this demo shows]</p>
+    <div class="badge-row" style="margin-top:24px">
+      <span class="badge red">❌ [Anti-pattern name]</span>
+      <span class="badge gold">&rarr;</span>
+      <span class="badge" style="border-color:var(--cyan);color:var(--cyan)">✅ [Solution name]</span>
+    </div>
+  </div>
+
+  <!-- ══ SCENE 2: Problem / Naive Approach Fails (4-12s) ══ -->
+  <!-- CUSTOMIZE: Describe what goes wrong -->
+  <div id="scene-2" class="cinema-scene">
+    <h2>❌ The Naive Approach: [Name]</h2>
+    <p style="margin-bottom:20px">[Describe the anti-pattern and its consequences]</p>
+    <div class="badge-row">
+      <span class="badge red">[Problem 1]</span>
+      <span class="badge red">[Problem 2]</span>
+      <span class="badge red">[Problem 3]</span>
+    </div>
+    <div style="margin-top:20px;padding:20px;background:var(--card);border-radius:12px;max-width:600px;width:90%;border:1px solid var(--crimson)">
+      <p style="color:var(--red);font-size:clamp(14px,1.2vw,18px)">🚫 [Scenario: what happens]</p>
+      <p style="color:var(--crimson);font-size:clamp(14px,1.2vw,18px);margin-top:8px">💥 [Failure consequence]</p>
+    </div>
+    <div class="warning-overlay" id="warning-overlay">
+      <div class="warning-box">
+        <h2>⚠️ SYSTEM COMPROMISED</h2>
+        <p>[Warning message — coordinator intervenes]</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCENE 3: Solution / Resilient Succeeds (12-22s) ══ -->
+  <!-- CUSTOMIZE: Describe the solution pillars -->
+  <div id="scene-3" class="cinema-scene">
+    <h2>✅ The Resilient Architecture: [Solution Name]</h2>
+    <p style="margin-bottom:20px">[Describe the three pillars of the solution]</p>
+    <div class="pillar-grid" id="pillar-grid">
+      <div class="pillar-card" id="pillar-1">
+        <div class="icon">🛡️</div>
+        <h3>[Pillar 1 Title]</h3>
+        <p>[Pillar 1 description]</p>
+      </div>
+      <div class="pillar-card" id="pillar-2">
+        <div class="icon">⚡</div>
+        <h3>[Pillar 2 Title]</h3>
+        <p>[Pillar 2 description]</p>
+      </div>
+      <div class="pillar-card" id="pillar-3">
+        <div class="icon">📊</div>
+        <h3>[Pillar 3 Title]</h3>
+        <p>[Pillar 3 description]</p>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:16px 24px;background:rgba(0,212,170,0.1);border-radius:10px;border:1px solid var(--cyan)">
+      <p style="color:var(--cyan);font-size:clamp(14px,1.2vw,18px)">✅ [Success scenario description]</p>
+    </div>
+  </div>
+
+  <!-- ══ SCENE 4: Metrics (22-28s) ══ -->
+  <!-- CUSTOMIZE: Set data-target values to your metrics -->
+  <div id="scene-4" class="cinema-scene">
+    <h2>📊 The Results</h2>
+    <div class="metrics-grid" id="metrics-grid">
+      <div class="metric-card" id="metric-tokens">
+        <div class="value" data-target="75">0</div>
+        <div class="label">⚡ [Metric 1] (%)</div>
+      </div>
+      <div class="metric-card" id="metric-interventions">
+        <div class="value" data-target="100">0</div>
+        <div class="label">🛡️ [Metric 2] (%)</div>
+      </div>
+      <div class="metric-card" id="metric-efficiency">
+        <div class="value" data-target="95">0</div>
+        <div class="label">📈 [Metric 3] (%)</div>
+      </div>
+    </div>
+    <p style="margin-top:24px;color:var(--muted);font-size:clamp(14px,1.2vw,20px)">🤖 Built with [Model Name]</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- MAIN CONTENT (below-the-fold walkthrough)       -->
+<!-- ════════════════════════════════════════════════ -->
+<div id="main-content">
+
+<header>
+  <div class="header-inner">
+    <h1>🎬 [Demo Title]</h1>
+    <div class="header-actions">
+      <button class="btn speech" id="btn-narrate-all">🔊 Read Walkthrough</button>
+    </div>
+  </div>
+</header>
+
+<!-- ── Architecture Overview Cards ── -->
+<!-- CUSTOMIZE: Replace with your scenario's key points -->
+<section>
+  <h2>🏗️ Architecture Overview</h2>
+  <div class="card-grid">
+    <div class="card" style="border-left:4px solid var(--crimson)">
+      <h4 style="color:var(--crimson)">❌ [Anti-pattern Name]</h4>
+      <p>[Describe the naive approach and its drawbacks]</p>
+    </div>
+    <div class="card" style="border-left:4px solid var(--cyan)">
+      <h4 style="color:var(--cyan)">✅ [Solution Name]</h4>
+      <p>[Describe the recommended approach and its benefits]</p>
+    </div>
+    <div class="card">
+      <h4>⚡ Key Insight</h4>
+      <p>[The core architectural insight that makes the solution superior]</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Comparison Table ── -->
+<!-- CUSTOMIZE: Update table rows with your metrics -->
+<section>
+  <h2>📊 Side-by-Side Comparison</h2>
+  <table class="comparison-table">
+    <thead>
+      <tr><th>📊 Metric</th><th class="naive">❌ [Naive Name]</th><th class="resilient">✅ [Resilient Name]</th><th>📈 Impact</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>[Metric 1]</td><td class="naive">[Naive value]</td><td class="resilient">[Resilient value]</td><td style="color:var(--green)">[Impact]</td></tr>
+      <tr><td>[Metric 2]</td><td class="naive">[Naive value]</td><td class="resilient">[Resilient value]</td><td style="color:var(--green)">[Impact]</td></tr>
+      <tr><td>[Metric 3]</td><td class="naive">[Naive value]</td><td class="resilient">[Resilient value]</td><td style="color:var(--green)">[Impact]</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ── Interactive Calculator ── -->
+<!-- CUSTOMIZE: Update calculator parameters & labels -->
+<section>
+  <h2>🧮 Interactive [Calculator Name]</h2>
+  <div class="calc-widget">
+    <h3>📊 Configurable [Estimator Name]</h3>
+    <div class="calc-row">
+      <label for="param1">📋 [Parameter 1]</label>
+      <input type="range" id="param1" min="10" max="100" value="50" step="1">
+      <input type="number" id="param1-num" value="50" min="10" max="100">
+    </div>
+    <div class="calc-row">
+      <label for="param2">⚡ [Parameter 2]</label>
+      <input type="range" id="param2" min="5" max="50" value="15" step="1">
+      <input type="number" id="param2-num" value="15" min="5" max="50">
+    </div>
+    <div class="calc-result" id="calc-result">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:center">
+        <div><div class="big" id="calc-naive">0</div><div style="color:var(--crimson);font-size:14px">❌ [Naive label]</div></div>
+        <div><div class="big" id="calc-resilient" style="color:var(--green)">0%</div><div style="color:var(--green);font-size:14px">✅ [Savings label]</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Terminal Simulator ── -->
+<!-- CUSTOMIZE: Update terminal scripts -->
+<section>
+  <h2>🖥️ Before vs After Terminal</h2>
+  <div class="terminal-pair">
+    <div class="terminal">
+      <div class="terminal-header">
+        <span class="terminal-dot red"></span><span class="terminal-dot yellow"></span><span class="terminal-dot green"></span>
+        <span>❌ [Naive label]</span>
+      </div>
+      <div class="terminal-body" id="terminal-naive">
+        <span class="prompt">$ </span><span id="cursor-naive" class="cursor"></span>
+      </div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-header">
+        <span class="terminal-dot red"></span><span class="terminal-dot yellow"></span><span class="terminal-dot green"></span>
+        <span>✅ [Resilient label]</span>
+      </div>
+      <div class="terminal-body" id="terminal-resilient">
+        <span class="prompt">$ </span><span id="cursor-resilient" class="cursor"></span>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:center">
+    <button class="btn" id="btn-replay-terminal">🔄 Replay</button>
+  </div>
+</section>
+
+<!-- ── Modal Lightbox ── -->
+<section>
+  <h2>🖼️ Visual Diagrams</h2>
+  <p style="text-align:center;color:var(--muted);margin-bottom:16px">Click any diagram to enlarge.</p>
+  <div class="card-grid" id="diagram-gallery">
+    <!-- CUSTOMIZE: Add your diagram cards here -->
+    <div class="card" style="padding:0;overflow:hidden;cursor:zoom-in" onclick='openModal(this.querySelector("svg"))'>
+      <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+        <rect width="400" height="200" fill="#0a0e27" rx="8"/>
+        <text x="200" y="100" font-family="Arial,sans-serif" font-size="16" fill="#667799" text-anchor="middle">📐 Replace with your diagram SVG</text>
+        <text x="200" y="130" font-family="Arial,sans-serif" font-size="12" fill="#667799" text-anchor="middle">(or use &lt;img&gt; with external files)</text>
+      </svg>
+      <div style="padding:12px 16px;border-top:1px solid rgba(255,255,255,0.05)">
+        <h4 style="color:var(--cyan);font-size:14px;margin:0">📐 [Diagram Title]</h4>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>🤖 Generated by <strong>[Model Name]</strong> — 🎬 <a href="https://github.com/rifaterdemsahin/animation-template-llm-training">Animation Template</a></p>
+</footer>
+
+</div><!-- /main-content -->
+
+<!-- ── Modal Overlay ── -->
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-label="Enlarged view">
+  <button id="modal-close" aria-label="Close" tabindex="0">✕</button>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════ */
+/* MODAL LIGHTBOX                                   */
+/* ════════════════════════════════════════════════ */
+const modalOverlay = document.getElementById('modal-overlay');
+const modalClose = document.getElementById('modal-close');
+
+function openModal(el) {
+  const clone = el.cloneNode(true);
+  clone.style.cursor = 'default';
+  while (modalOverlay.firstChild) {
+    if (modalOverlay.firstChild === modalClose) break;
+    modalOverlay.removeChild(modalOverlay.firstChild);
+  }
+  modalOverlay.insertBefore(clone, modalClose);
+  modalOverlay.classList.add('open');
+  modalClose.classList.add('visible');
+  modalClose.focus();
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  modalOverlay.classList.remove('open');
+  modalClose.classList.remove('visible');
+  document.body.style.overflow = '';
+}
+modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+modalClose.addEventListener('click', closeModal);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+/* ════════════════════════════════════════════════ */
+/* CUSTOMIZE INTERACTIVE CALCULATOR                 */
+/* Update the parameter IDs and formulas below       */
+/* ════════════════════════════════════════════════ */
+function setupCalculator() {
+  const p1 = document.getElementById('param1');
+  const p2 = document.getElementById('param2');
+  const p1n = document.getElementById('param1-num');
+  const p2n = document.getElementById('param2-num');
+  const naiveEl = document.getElementById('calc-naive');
+  const savingsEl = document.getElementById('calc-resilient');
+
+  function update() {
+    const v1 = parseInt(p1.value);
+    const v2 = parseInt(p2.value);
+    p1n.value = v1;
+    p2n.value = v2;
+    // CUSTOMIZE: Replace with your formula
+    const naive = v1 * v2;
+    const resilient = v1 * v2 * 0.5;
+    const savings = naive > 0 ? Math.round((1 - resilient / naive) * 100) : 0;
+    naiveEl.textContent = naive;
+    savingsEl.textContent = savings + '%';
+  }
+  [p1, p2].forEach(s => s.addEventListener('input', update));
+  [p1n, p2n].forEach(inp => inp.addEventListener('change', function() {
+    const map = { 'param1-num': p1, 'param2-num': p2 };
+    map[this.id].value = Math.min(parseInt(this.value) || 0, parseInt(map[this.id].max));
+    update();
+  }));
+  update();
+}
+
+/* ════════════════════════════════════════════════ */
+/* CUSTOMIZE TERMINAL SIMULATOR                     */
+/* Replace naiveScript and resilientScript arrays    */
+/* ════════════════════════════════════════════════ */
+function setupTerminal() {
+  const naiveBody = document.getElementById('terminal-naive');
+  const resilientBody = document.getElementById('terminal-resilient');
+
+  const naiveScript = [
+    { text: '$ [command]\\n', cls: 'prompt' },
+    { text: '[naive output line 1]\\n', cls: 'info' },
+    { text: '[naive output line 2]\\n', cls: 'error' },
+    { text: '❌ Task failed.\\n', cls: 'error' },
+    { text: '$ ', cls: 'prompt' },
+  ];
+  const resilientScript = [
+    { text: '$ [command]\\n', cls: 'prompt' },
+    { text: '[resilient output line 1]\\n', cls: 'success' },
+    { text: '[resilient output line 2]\\n', cls: 'success' },
+    { text: '✅ Task completed.\\n', cls: 'success' },
+    { text: '$ ', cls: 'prompt' },
+  ];
+
+  function typeScript(container, script, cursorId, speed = 25) {
+    container.innerHTML = '';
+    const cursor = document.getElementById(cursorId);
+    let lineIdx = 0, colIdx = 0, currentSpan = null;
+    function typeChar() {
+      if (lineIdx >= script.length) { if (cursor) cursor.classList.remove('hidden'); return; }
+      const line = script[lineIdx];
+      if (!currentSpan) { currentSpan = document.createElement('span'); currentSpan.className = line.cls; container.appendChild(currentSpan); }
+      if (colIdx < line.text.length) { currentSpan.textContent += line.text[colIdx]; colIdx++; setTimeout(typeChar, speed); }
+      else { lineIdx++; colIdx = 0; currentSpan = null; if (lineIdx >= script.length) { if (cursor) cursor.classList.remove('hidden'); return; } setTimeout(typeChar, speed * 0.5); }
+    }
+    if (cursor) cursor.classList.add('hidden');
+    typeChar();
+  }
+
+  let typing = false;
+  document.getElementById('btn-replay-terminal').addEventListener('click', () => {
+    if (typing) return; typing = true;
+    typeScript(naiveBody, naiveScript, 'cursor-naive', 20);
+    setTimeout(() => {
+      typeScript(resilientBody, resilientScript, 'cursor-resilient', 15);
+      setTimeout(() => { typing = false; }, 3000);
+    }, naiveScript.reduce((s, l) => s + l.text.length * 20, 0) + 500);
+  });
+}
+
+/* ════════════════════════════════════════════════ */
+/* GSAP CINEMATIC ANIMATION — 4-Scene Timeline      */
+/* ════════════════════════════════════════════════ */
+/*                                                  */
+/* CUSTOMIZE: Adjust timing, add/remove tweens.     */
+/* Scene timing (default):                          */
+/*   Scene 1: 0-4s    (setup / title)               */
+/*   Scene 2: 4-12s   (problem / naive fails)       */
+/*   Scene 3: 12-22s  (solution / resilient wins)   */
+/*   Scene 4: 22-28s  (metrics comparison)          */
+/* ════════════════════════════════════════════════ */
+
+function startCinema() {
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cinemaOverlay = document.getElementById('cinematic-overlay');
+  const skipBtn = document.getElementById('skip-cinema');
+  const mainContent = document.getElementById('main-content');
+  const progress = document.getElementById('cinema-progress');
+
+  if (prefersReduced) {
+    cinemaOverlay.style.display = 'none';
+    mainContent.classList.add('visible');
+    return;
+  }
+
+  const tl = gsap.timeline({
+    onComplete: () => {
+      gsap.to(cinemaOverlay, { opacity: 0, duration: 1, delay: 1,
+        onComplete: () => { cinemaOverlay.classList.add('hidden'); mainContent.classList.add('visible'); }
+      });
+    }
+  });
+
+  // ── Scene 1: Setup / Title Card (0-4s) ──
+  // CUSTOMIZE: Fade in sequence for your title elements
+  tl.set('#scene-1', { opacity: 0, display: 'flex' });
+  tl.to('#scene-1', { opacity: 1, duration: 0.8, ease: 'power2.out' });
+  tl.to('#scene-1 h1', { opacity: 0, y: -30, duration: 0.6 }, '+=2.5');
+  tl.to('#scene-1 h2', { opacity: 0, y: -30, duration: 0.6 }, '-=0.4');
+  tl.to('#scene-1 p', { opacity: 0, y: -30, duration: 0.6 }, '-=0.4');
+  tl.to('#scene-1 .badge-row', { opacity: 0, y: -30, duration: 0.5 }, '-=0.3');
+  tl.to('#scene-1', { opacity: 0, duration: 0.3 });
+
+  // ── Scene 2: Problem / Naive Fails (4-12s) ──
+  // CUSTOMIZE: Replace with your problem visualization
+  tl.set('#scene-2', { opacity: 0, display: 'flex' });
+  tl.to('#scene-2', { opacity: 1, duration: 0.8, ease: 'power2.out' });
+  tl.from('#scene-2 h2', { opacity: 0, y: 30, duration: 0.6 });
+  tl.from('#scene-2 p', { opacity: 0, y: 20, duration: 0.5 }, '-=0.3');
+  tl.from('#scene-2 .badge-row', { opacity: 0, scale: 0.8, duration: 0.5, stagger: 0.15 }, '-=0.2');
+
+  // Warning overlay flash
+  tl.to('#warning-overlay', { opacity: 1, duration: 0.3 });
+  tl.to('#warning-overlay', { opacity: 0, duration: 0.5 }, '+=1.5');
+  tl.to('#scene-2', { backgroundColor: 'rgba(233,69,96,0.1)', duration: 0.2 });
+  tl.to('#scene-2', { backgroundColor: 'transparent', duration: 0.8 }, '+=0.3');
+
+  // Exit scene 2
+  tl.to('#scene-2 h2', { opacity: 0, y: -20, duration: 0.4 });
+  tl.to('#scene-2 p', { opacity: 0, y: -20, duration: 0.4 }, '-=0.3');
+  tl.to('#scene-2 .badge-row', { opacity: 0, y: -20, duration: 0.3 }, '-=0.3');
+  tl.to('#scene-2 > div', { opacity: 0, y: -20, duration: 0.3 }, '-=0.3');
+  tl.to('#scene-2', { opacity: 0, duration: 0.3 });
+
+  // ── Scene 3: Solution / Resilient Succeeds (12-22s) ──
+  // CUSTOMIZE: Replace with your solution visualization
+  tl.set('#scene-3', { opacity: 0, display: 'flex' });
+  tl.to('#scene-3', { opacity: 1, duration: 0.8, ease: 'power2.out' });
+  tl.from('#scene-3 h2', { opacity: 0, y: 30, duration: 0.6 });
+  tl.from('#scene-3 > p', { opacity: 0, y: 20, duration: 0.5 }, '-=0.3');
+  tl.from('#pillar-grid .pillar-card', {
+    opacity: 0, y: 30, duration: 0.7, stagger: 0.25, ease: 'back.out(1.7)',
+  }, '-=0.2');
+  tl.from('#scene-3 > div:last-of-type', { opacity: 0, scale: 0.9, duration: 0.6 }, '-=0.2');
+
+  // Exit scene 3
+  tl.to('#scene-3 h2', { opacity: 0, y: -20, duration: 0.4 });
+  tl.to('#scene-3 > p', { opacity: 0, y: -20, duration: 0.3 }, '-=0.3');
+  tl.to('#pillar-grid', { opacity: 0, y: -30, duration: 0.5, stagger: 0.1 });
+  tl.to('#scene-3 > div:last-of-type', { opacity: 0, y: -20, duration: 0.3 }, '-=0.2');
+  tl.to('#scene-3', { opacity: 0, duration: 0.3 });
+
+  // ── Scene 4: Metrics (22-28s) ──
+  // CUSTOMIZE: Update data-target values on HTML elements above
+  tl.set('#scene-4', { opacity: 0, display: 'flex' });
+  tl.to('#scene-4', { opacity: 1, duration: 0.8, ease: 'power2.out' });
+  tl.from('#scene-4 h2', { opacity: 0, y: 30, duration: 0.6 });
+  tl.from('#metrics-grid .metric-card', {
+    opacity: 0, scale: 0.5, duration: 0.8, stagger: 0.2, ease: 'elastic.out(1, 0.3)',
+  }, '-=0.3');
+
+  // Animate counters using gsap.utils.snap
+  const counters = document.querySelectorAll('.metric-card .value');
+  tl.to(counters, {
+    textContent: function() { return this.dataset.target; },
+    duration: 2, ease: 'power2.out', snap: { textContent: 1 }, stagger: 0.2,
+  }, '-=0.5');
+
+  tl.to({}, { duration: 1.5 });
+  tl.to('#scene-4 h2', { opacity: 0, y: -20, duration: 0.4 });
+  tl.to('#metrics-grid', { opacity: 0, y: -30, duration: 0.5 });
+  tl.to('#scene-4', { opacity: 0, duration: 0.4 });
+
+  // Progress bar
+  tl.eventCallback('onUpdate', () => { progress.style.width = (tl.progress() * 100) + '%'; });
+
+  skipBtn.addEventListener('click', () => {
+    tl.progress(1);
+    gsap.set(cinemaOverlay, { opacity: 0 });
+    cinemaOverlay.classList.add('hidden');
+    mainContent.classList.add('visible');
+  });
+}
+
+/* ════════════════════════════════════════════════ */
+/* INITIALIZATION                                    */
+/* ════════════════════════════════════════════════ */
+window.onload = function() {
+  startCinema();
+  setupCalculator();
+  setupTerminal();
+};
+
+console.log('🎬 Animation Template loaded');
+console.log('📐 Customize by searching for "CUSTOMIZE" markers');
+</script>
+</body>
+</html>
