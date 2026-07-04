@@ -6,25 +6,25 @@
     "start": "remotion studio",
     "build": "remotion render",
     "render:all": "node render-all.mjs",
-    "render:scene1": "remotion render src/index.ts Scene1 out/scene1.mp4",
-    "render:scene2": "remotion render src/index.ts Scene2 out/scene2.mp4",
-    "render:scene3": "remotion render src/index.ts Scene3 out/scene3.mp4",
-    "render:scene4": "remotion render src/index.ts Scene4 out/scene4.mp4",
-    "render:full": "remotion render src/index.ts FullVideo out/full-video.mp4",
+    "render:scene1": "remotion render src/index.ts Scene1 exports/scene1.mp4",
+    "render:scene2": "remotion render src/index.ts Scene2 exports/scene2.mp4",
+    "render:scene3": "remotion render src/index.ts Scene3 exports/scene3.mp4",
+    "render:scene4": "remotion render src/index.ts Scene4 exports/scene4.mp4",
+    "render:full": "remotion render src/index.ts FullVideo exports/full-video.mp4",
     "studio": "remotion studio src/index.ts",
     "generate:assets": "node generate-assets.mjs",
     "generate:scene1": "node generate-assets.mjs && npm run render:scene1",
     "pipeline": "node generate-and-render.mjs"
   },
   "dependencies": {
-    "@remotion/bundler": "^4.0.484",
+    "@remotion/bundler": "4.0.484",
+    "@remotion/renderer": "4.0.484",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "remotion": "^4.0.242"
+    "remotion": "4.0.484"
   },
   "devDependencies": {
-    "@remotion/cli": "^4.0.242",
-    "@remotion/renderer": "^4.0.242",
+    "@remotion/cli": "4.0.484",
     "@types/react": "^18.3.12",
     "typescript": "^5.6.3"
   }

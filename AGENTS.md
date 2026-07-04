@@ -39,27 +39,32 @@ Each scene accepts these optional props:
 
 ## Embedding Rendered MP4 Walkthroughs
 
-When using this template to generate architectural content, embed the rendered Remotion MP4 after each corresponding scene section. The MP4 files are produced at `remotion/out/`:
+When using this template to generate architectural content, embed the rendered Remotion MP4 after each corresponding scene section. The MP4 files are produced at `remotion/exports/`:
 
 | Scene | MP4 File | Content |
 |-------|----------|---------|
-| Scene1 | `remotion/out/scene1.mp4` | Introduction / overview |
-| Scene2 | `remotion/out/scene2.mp4` | Architecture pillars breakdown |
-| Scene3 | `remotion/out/scene3.mp4` | Technical metrics / details |
-| Scene4 | `remotion/out/scene4.mp4` | Key features / badges |
-| Full  | `remotion/out/full-video.mp4` | Combined 28s walkthrough |
+| Scene1 | `remotion/exports/scene1.mp4` | Introduction / overview |
+| Scene2 | `remotion/exports/scene2.mp4` | Architecture pillars breakdown |
+| Scene3 | `remotion/exports/scene3.mp4` | Technical metrics / details |
+| Scene4 | `remotion/exports/scene4.mp4` | Key features / badges |
+| Full  | `remotion/exports/full-video.mp4` | Combined 28s walkthrough |
 
 **Embedding rule:** After each architectural scene section in the generated output (Markdown, HTML, or documentation), insert the corresponding MP4 as a video embed:
 
 ```markdown
 <!-- After Scene1 description -->
-<video src="remotion/out/scene1.mp4" controls width="100%"></video>
+<video src="remotion/exports/scene1.mp4" controls width="100%"></video>
 ```
 
 For full combined walkthrough, embed at the end of the document:
 
 ```markdown
-<video src="remotion/out/full-video.mp4" controls width="100%"></video>
+<video src="remotion/exports/full-video.mp4" controls width="100%"></video>
 ```
 
-**Pipeline integration:** The `npm run pipeline` command already renders all MP4s. After running the pipeline, reference the `remotion/out/` files for embedding in the template output.
+**Pipeline integration:** The `npm run pipeline` command already renders all MP4s to `remotion/exports/`. After running the pipeline, reference the `remotion/exports/` files for embedding in the template output. The exports directory is tracked by git so MP4s deploy to GitHub Pages.
+
+### Render-only (no asset regeneration):
+- `npm run render:all` — renders all 5 videos to `remotion/exports/` using existing assets in `generated-assets/`
+- `npm run render:scene1` through `render:scene4` — render individual scenes
+- `npm run render:full` — render combined 28s video

@@ -6,6 +6,7 @@ __pycache__/
 *.pyc
 .venv/
 venv/
-remotion/out/
+# remotion/out/ — REMOVED: MP4s must be tracked for GitHub Pages deployment
+# remotion/exports/ — REMOVED: rendered videos must be committed
 remotion/node_modules/
 remotion/dist/

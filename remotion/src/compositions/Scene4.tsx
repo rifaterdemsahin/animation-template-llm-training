@@ -7,8 +7,17 @@ type Metric = {
   icon: string;
 };
 
+function toBase64(str: string): string {
+  if (typeof Buffer !== 'undefined') return Buffer.from(str).toString('base64');
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
 type SceneProps = {
   svgData?: string;
+  svgDataUri?: string;
   audioSrc?: string;
   script?: string;
   title?: string;
@@ -24,6 +33,7 @@ const DEFAULT_METRICS: Metric[] = [
 
 const Scene4: React.FC<SceneProps> = ({
   svgData,
+  svgDataUri: precomputedUri,
   audioSrc,
   title = 'The Results: Unleashing Architectural Power',
   metrics,
@@ -36,9 +46,8 @@ const Scene4: React.FC<SceneProps> = ({
 
   const displayMetrics = metrics ?? DEFAULT_METRICS;
 
-  const svgDataUri = svgData
-    ? `data:image/svg+xml;base64,${Buffer.from(svgData).toString('base64')}`
-    : null;
+  const svgDataUri = precomputedUri
+    || (svgData ? `data:image/svg+xml;base64,${toBase64(svgData)}` : null);
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#0a0e27' }}>

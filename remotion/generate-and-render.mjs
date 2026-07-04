@@ -1,5 +1,5 @@
 import { spawn, execSync } from 'child_process';
-import { writeFile, mkdir, readFile } from 'fs/promises';
+import { writeFile, copyFile, mkdir, readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,7 +8,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..');
 const assetsDir = path.join(projectRoot, 'generated-assets');
 const promptsDir = path.join(assetsDir, 'prompts');
-const outDir = path.join(__dirname, 'out');
+const exportsDir = path.join(__dirname, 'exports');
+const publicDir = path.join(__dirname, 'public');
 const FLASK_PORT = 5177;
 
 function sleep(ms) {
@@ -92,17 +93,18 @@ async function textToSpeech(text, outputPath) {
 
 async function renderVideo(compositionId, inputProps) {
   const entryPoint = path.join(__dirname, 'src', 'index.ts');
-  const output = path.join(outDir, `${compositionId.toLowerCase()}.mp4`);
-  const propsJson = JSON.stringify(inputProps).replace(/"/g, '\\"');
+  const output = path.join(exportsDir, `${compositionId.toLowerCase()}.mp4`);
+  const propsJson = JSON.stringify(inputProps).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
   console.log(`Rendering ${compositionId} → ${output}...`);
 
   execSync(
-    `npx remotion render "${entryPoint}" ${compositionId} "${output}" --props='${propsJson}'`,
-    { cwd: __dirname, stdio: 'inherit' }
+    `npx remotion render "${entryPoint}" ${compositionId} "${output}" --props='${propsJson}' --overwrite`,
+    { cwd: __dirname, stdio: 'inherit', timeout: 600000 }
   );
 
-  console.log(`  Done: ${output}`);
+  const s = existsSync(output) ? (await import('fs/promises')).stat(output).then(st => st.size) : 0;
+  console.log(`  Done: ${output} (${s ? (s / 1024).toFixed(1) + ' KB' : 'empty'})`);
 }
 
 async function main() {
@@ -112,7 +114,8 @@ async function main() {
 
   await mkdir(assetsDir, { recursive: true });
   await mkdir(promptsDir, { recursive: true });
-  await mkdir(outDir, { recursive: true });
+  await mkdir(exportsDir, { recursive: true });
+  await mkdir(publicDir, { recursive: true });
 
   // 1. Start Flask server
   console.log('Starting Flask server...');
@@ -123,7 +126,7 @@ async function main() {
   process.on('SIGINT', () => { stopFlask(); process.exit(1); });
   process.on('SIGTERM', () => { stopFlask(); process.exit(1); });
 
-  let svgData, narrationScript, audioSrc;
+  let svgData, svgDataUri, narrationScript;
 
   try {
     await waitForServer(`http://localhost:${FLASK_PORT}/api/health`);
@@ -132,6 +135,7 @@ async function main() {
     // 2. Generate SVG infographic
     console.log('[1/4] Generating infographic SVG via Gemini...');
     svgData = await generateInfographic(topic);
+    svgDataUri = `data:image/svg+xml;base64,${Buffer.from(svgData).toString('base64')}`;
     const svgPath = path.join(assetsDir, 'infographic.svg');
     await writeFile(svgPath, svgData, 'utf-8');
     console.log(`  Saved: ${svgPath}\n`);
@@ -146,14 +150,15 @@ async function main() {
 
     // 4. Convert narration to speech
     console.log('[3/4] Converting narration to speech...');
-    audioSrc = path.join(assetsDir, 'narration.mp3');
-    await textToSpeech(narrationScript, audioSrc);
-    console.log(`  Saved: ${audioSrc} (${narration.duration}s estimated)\n`);
+    const audioOutputPath = path.join(assetsDir, 'narration.mp3');
+    await textToSpeech(narrationScript, audioOutputPath);
+    console.log(`  Saved: ${audioOutputPath} (${narration.duration}s estimated)\n`);
 
-    // 5. Render videos with generated assets
+    // 5. Render videos with generated assets (audio disabled — use staticFile() for audio)
     const inputProps = {
       svgData,
-      audioSrc,
+      svgDataUri,
+      audioSrc: undefined,
       script: narrationScript,
     };
 

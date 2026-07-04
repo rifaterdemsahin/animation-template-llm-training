@@ -1,7 +1,16 @@
 import { AbsoluteFill, Audio, Img, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 
+function toBase64(str: string): string {
+  if (typeof Buffer !== 'undefined') return Buffer.from(str).toString('base64');
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
 type SceneProps = {
   svgData?: string;
+  svgDataUri?: string;
   audioSrc?: string;
   script?: string;
   title?: string;
@@ -14,6 +23,7 @@ type SceneProps = {
 
 const Scene1: React.FC<SceneProps> = ({
   svgData,
+  svgDataUri: precomputedUri,
   audioSrc,
   title = 'CQRS & Event Sourcing',
   subtitle = 'Mastering Data Flow, Empowering Applications',
@@ -37,9 +47,8 @@ const Scene1: React.FC<SceneProps> = ({
 
   const displayBadges = badges ?? ['Built with GPT-4o', 'Remotion Video'];
 
-  const svgDataUri = svgData
-    ? `data:image/svg+xml;base64,${Buffer.from(svgData).toString('base64')}`
-    : null;
+  const svgDataUri = precomputedUri
+    || (svgData ? `data:image/svg+xml;base64,${toBase64(svgData)}` : null);
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#0a0e27' }}>
